@@ -1,8 +1,11 @@
 import Vue from "vue";
-import App from "./App.vue";
+// Global Styles
+import "normalize.css";
+// View
+import Home from "@/views/home/home.vue";
 
 Vue.config.productionTip = false;
 
 new Vue({
-  render: h => h(App)
+  render: h => h(Home)
 }).$mount("#app");
