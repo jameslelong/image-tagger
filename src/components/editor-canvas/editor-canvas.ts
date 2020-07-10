@@ -38,7 +38,7 @@ export default class EditorCanvas extends Vue {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
     this.editorContext = this.editorCanvas.getContext("2d") as CanvasRenderingContext2D;
 
-    // needs to scale dynamically
+    // todo - needs to scale dynamically
     this.editorCanvas.height = 500;
     this.editorCanvas.width = 500;
 
@@ -62,12 +62,15 @@ export default class EditorCanvas extends Vue {
 
   endSelection(e: MouseEvent): void {
     if (!this.activeSelection) return;
+
+    this.selections.push(this.activeSelection);
+
     this.activeSelection = undefined;
 
     // todo - capture start and end points. save rect.
   }
 
-  animationStep(timestamp: number) {
+  animationStep(timestamp: number): void {
     // todo - no point to update if the mouse isn't active?
 
     if (this.startTimestamp === undefined) {
@@ -75,27 +78,32 @@ export default class EditorCanvas extends Vue {
     }
     const elapsed = timestamp - this.startTimestamp;
 
-    this.draw();
-    
+    // clear canvas
+    if (this.editorContext && this.editorCanvas) {
+      this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
+      if (this.activeSelection) {
+        this.drawRectangle(this.activeSelection);
+      }
+      for (const selection of this.selections) {
+        this.drawRectangle(selection);
+      }
+    }
+
     window.requestAnimationFrame(this.animationStep);
   }
 
-  draw() {
-    if (!this.activeSelection || !this.editorContext || !this.editorCanvas) return;
-
-    // clear canvas
-    this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
+  drawRectangle(selection: Selection): void {
+    if (!this.editorContext || !this.editorCanvas) return;
 
     // calculate the height and width of the selection based on start and end points.
-    let height: number = Math.abs(this.activeSelection.startPoint.x - this.activeSelection.endPoint.x);
-    let width: number = Math.abs(this.activeSelection.startPoint.y - this.activeSelection.endPoint.y);  
+    let height: number = Math.abs(selection.startPoint.x - selection.endPoint.x);
+    let width: number = Math.abs(selection.startPoint.y - selection.endPoint.y);  
     // inverse the absolute number based on current mouse position compared to start position.
-    if (this.activeSelection.startPoint.x > this.activeSelection.endPoint.x) height =- height;
-    if (this.activeSelection.startPoint.y > this.activeSelection.endPoint.y) width =- width;  
+    if (selection.startPoint.x > selection.endPoint.x) height =- height;
+    if (selection.startPoint.y > selection.endPoint.y) width =- width;  
 
     // Animate/Draw Here
-    this.editorContext.strokeRect(this.activeSelection.startPoint.x, this.activeSelection.startPoint.y, height, width);
-    this.editorContext.fill();
+    this.editorContext.strokeRect(selection.startPoint.x, selection.startPoint.y, height, width);
   }
 
   getMousePos(canvas: HTMLCanvasElement, e: MouseEvent): Vector2 {
