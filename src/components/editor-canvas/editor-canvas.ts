@@ -8,18 +8,27 @@ class Vector2 {
     this.x = x;
     this.y = y;
   }
+
+  // todo - function that manages addition/subtraciton of two vector2's;
 }
 
 class Selection {
-  public startPoint: Vector2;
-  public endPoint: Vector2;
-
-  constructor(startX: number, startY: number) {
-    this.startPoint = this.endPoint = new Vector2(startX, startY);
+  public a: Vector2;
+  public b: Vector2;
+  
+  constructor(pos: Vector2) {
+    this.a = this.b = pos;
   }
 
-  public setEndPoint(endX: number, endY: number) {
-    this.endPoint = new Vector2(endX, endY);
+  public setSecondary(pos: Vector2) {
+    this.b = pos;
+  }
+
+  public moveRelative(offset: Vector2): void {
+    this.a.x += offset.x;
+    this.a.y += offset.y;
+    this.b.x += offset.x;
+    this.b.y += offset.y;
   }
 }
 
@@ -31,8 +40,11 @@ export default class EditorCanvas extends Vue {
   public editorContext?: CanvasRenderingContext2D
 
   public startTimestamp?: number;
+  public newSelection?: Selection;
   public activeSelection?: Selection;
   public selections: Array<Selection> = new Array<Selection>();
+
+  private previousMousePosition?: Vector2;
 
   mounted(): void {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
@@ -46,28 +58,58 @@ export default class EditorCanvas extends Vue {
     window.requestAnimationFrame(this.animationStep);
   }
 
+  isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
+    const withinX = (a.x < b.x && a.x > c.x) || (a.x > b.x && a.x < c.x);
+    const withinY = (a.y < b.y && a.y > c.y) || (a.y > b.y && a.y < c.y);
+
+    return withinX && withinY;
+  }
+
   beginSelection(e: MouseEvent): void {
     if (!this.editorContext|| !this.editorCanvas) return;
     
-    const mousePos = this.getMousePos(this.editorCanvas, e);
-    this.activeSelection = new Selection(mousePos.x, mousePos.y);
+    const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
+    
+    // todo - Check if selection is within the safe zone around a point, or within
+    for (const selection of this.selections) {
+      // todo - check selection is in either of the four corners (within 10px?), calculate x/y top left and bottom right of deadzone.
+
+
+      // Check selection is within centre but not within deadzone
+      if (this.isWithin(mousePos, selection.a, selection.b)) {
+        this.activeSelection = selection;
+      }
+    }
+
+    if (this.activeSelection === undefined) {
+      this.activeSelection = this.newSelection = new Selection(mousePos);
+    }
   }
 
   dragSelection(e: MouseEvent): void {
     if (!this.activeSelection || !this.editorCanvas) return;
 
     const mousePos = this.getMousePos(this.editorCanvas, e);
-    this.activeSelection.setEndPoint(mousePos.x, mousePos.y);
+    if (this.newSelection !== undefined) {
+      // Set end point of new selection
+      this.activeSelection.setSecondary(mousePos);
+    } else if (this.previousMousePosition !== undefined) {
+      // Move position of existing
+      const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
+      this.activeSelection.moveRelative(offset);
+    }
+
+    this.previousMousePosition = mousePos;
   }
 
   endSelection(e: MouseEvent): void {
     if (!this.activeSelection) return;
 
-    this.selections.push(this.activeSelection);
-
-    this.activeSelection = undefined;
-
-    // todo - capture start and end points. save rect.
+    if (this.newSelection !== undefined) {
+      this.selections.push(this.newSelection);
+    }
+    
+    this.previousMousePosition = this.activeSelection = this.newSelection = undefined;
   }
 
   animationStep(timestamp: number): void {
@@ -77,12 +119,12 @@ export default class EditorCanvas extends Vue {
       this.startTimestamp = timestamp;
     }
     const elapsed = timestamp - this.startTimestamp;
-
-    // clear canvas
+    
+    // Redraw canvas
     if (this.editorContext && this.editorCanvas) {
       this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
-      if (this.activeSelection) {
-        this.drawRectangle(this.activeSelection);
+      if (this.newSelection) {
+        this.drawRectangle(this.newSelection);
       }
       for (const selection of this.selections) {
         this.drawRectangle(selection);
@@ -96,14 +138,14 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext || !this.editorCanvas) return;
 
     // calculate the height and width of the selection based on start and end points.
-    let height: number = Math.abs(selection.startPoint.x - selection.endPoint.x);
-    let width: number = Math.abs(selection.startPoint.y - selection.endPoint.y);  
+    let height: number = Math.abs(selection.a.x - selection.b.x);
+    let width: number = Math.abs(selection.a.y - selection.b.y);  
     // inverse the absolute number based on current mouse position compared to start position.
-    if (selection.startPoint.x > selection.endPoint.x) height =- height;
-    if (selection.startPoint.y > selection.endPoint.y) width =- width;  
+    if (selection.a.x > selection.b.x) height =- height;
+    if (selection.a.y > selection.b.y) width =- width;  
 
     // Animate/Draw Here
-    this.editorContext.strokeRect(selection.startPoint.x, selection.startPoint.y, height, width);
+    this.editorContext.strokeRect(selection.a.x, selection.a.y, height, width);
   }
 
   getMousePos(canvas: HTMLCanvasElement, e: MouseEvent): Vector2 {
