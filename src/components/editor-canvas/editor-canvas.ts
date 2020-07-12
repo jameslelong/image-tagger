@@ -14,14 +14,24 @@ class Vector2 {
     this.x += toAdd.x;
     this.y += toAdd.y;
   }
-
   // todo - function that manages addition/subtraciton of two vector2's;
 }
 
 class Selection {
   public a: Vector2;
   public b: Vector2;
-  
+
+  private _absHeight?: number;
+  private _absWidth?: number;  
+
+  get absHeight(): number {
+    return Math.abs(this.a.x - this.b.x);
+  }
+
+  get absWidth(): number {
+    return Math.abs(this.a.y - this.b.y);
+  }
+
   constructor(pos: Vector2) {
     this.a = this.b = pos;
   }
@@ -77,8 +87,6 @@ export default class EditorCanvas extends Vue {
     // todo - Check if selection is within the safe zone around a point, or within
     for (const selection of this.selections) {
       // todo - check selection is in either of the four corners (within 10px?), calculate x/y top left and bottom right of deadzone.
-
-
       // Check selection is within centre but not within deadzone
       if (this.isWithin(mousePos, selection.a, selection.b)) {
         this.activeSelection = selection;
@@ -117,8 +125,6 @@ export default class EditorCanvas extends Vue {
   }
 
   animationStep(timestamp: number): void {
-    // todo - no point to update if the mouse isn't active?
-
     if (this.startTimestamp === undefined) {
       this.startTimestamp = timestamp;
     }
@@ -141,12 +147,10 @@ export default class EditorCanvas extends Vue {
   drawRectangle(selection: Selection): void {
     if (!this.editorContext || !this.editorCanvas) return;
 
-    // calculate the height and width of the selection based on start and end points.
-    let height: number = Math.abs(selection.a.x - selection.b.x);
-    let width: number = Math.abs(selection.a.y - selection.b.y);  
     // inverse the absolute number based on current mouse position compared to start position.
-    if (selection.a.x > selection.b.x) height =- height;
-    if (selection.a.y > selection.b.y) width =- width;  
+
+    const height: number = selection.a.x > selection.b.x ? -selection.absHeight : selection.absHeight;
+    const width: number = selection.a.y > selection.b.y ? -selection.absWidth : selection.absWidth;
 
     // Animate/Draw Here
     this.editorContext.strokeRect(selection.a.x, selection.a.y, height, width);
