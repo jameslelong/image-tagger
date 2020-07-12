@@ -9,6 +9,12 @@ class Vector2 {
     this.y = y;
   }
 
+  add(toAdd: Vector2): void {
+    // Add vector 2 to the vector 2's class. 
+    this.x += toAdd.x;
+    this.y += toAdd.y;
+  }
+
   // todo - function that manages addition/subtraciton of two vector2's;
 }
 
@@ -20,15 +26,13 @@ class Selection {
     this.a = this.b = pos;
   }
 
-  public setSecondary(pos: Vector2) {
+  public setSecondary(pos: Vector2): void {
     this.b = pos;
   }
 
   public moveRelative(offset: Vector2): void {
-    this.a.x += offset.x;
-    this.a.y += offset.y;
-    this.b.x += offset.x;
-    this.b.y += offset.y;
+    this.a.add(offset);
+    this.b.add(offset);
   }
 }
 
