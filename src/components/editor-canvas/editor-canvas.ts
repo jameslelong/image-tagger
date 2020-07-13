@@ -18,8 +18,10 @@ class Vector2 {
 }
 
 class Selection {
+  // todo - you shouldn't be able to set a and b directly.
   public a: Vector2;
-  public b: Vector2;
+  public b: Vector2; 
+  // todo - instead of calculate c/d on get, calculate on set.
 
   private _absHeight?: number;
   private _absWidth?: number;  
@@ -32,11 +34,39 @@ class Selection {
     return Math.abs(this.a.y - this.b.y);
   }
 
+  private _relHeight?: number;
+  private _relWidth?: number;
+
+  get relHeight(): number {
+    return this.a.x > this.b.x ? -this.absHeight : this.absHeight;
+  }
+
+  get relWidth(): number {
+    return this.a.y > this.b.y ? -this.absWidth : this.absWidth;
+  }
+
+  // todo - C&D are the two other points, these vectors are generated from the height/width
+  // todo - the names c/d may be a little confusing when trying to actuall get the data.
+  private _c?: Vector2;
+  private _d?: Vector2;
+
+  get c(): Vector2 {
+    const x = this.a.x + this.relHeight;
+    const y = this.a.y;
+    return new Vector2(x, y);
+  }
+
+  get d(): Vector2 {
+    const x = this.b.x - this.relHeight;
+    const y = this.b.y;
+    return new Vector2(x, y);
+  }
+
   constructor(pos: Vector2) {
     this.a = this.b = pos;
   }
 
-  public setSecondary(pos: Vector2): void {
+  public setb(pos: Vector2): void {
     this.b = pos;
   }
 
@@ -84,11 +114,21 @@ export default class EditorCanvas extends Vue {
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
     
+    console.log('start');
+    
     // todo - Check if selection is within the safe zone around a point, or within
     for (const selection of this.selections) {
-      // todo - check selection is in either of the four corners (within 10px?), calculate x/y top left and bottom right of deadzone.
-      // Check selection is within centre but not within deadzone
-      if (this.isWithin(mousePos, selection.a, selection.b)) {
+      // todo - this vector math is very verbose, would be nice to be able to do it cleaner without affectng the original class value.
+      if (this.isWithin(mousePos, new Vector2(selection.a.x - 5, selection.a.y - 5), new Vector2(selection.a.x + 5, selection.a.y + 5))) {
+        console.log("Within A");
+      } else if (this.isWithin(mousePos, new Vector2(selection.b.x - 5, selection.b.y - 5), new Vector2(selection.b.x + 5, selection.b.y + 5))) {
+        console.log("Within B");
+      } else if (this.isWithin(mousePos, new Vector2(selection.c.x - 5, selection.c.y - 5), new Vector2(selection.c.x + 5, selection.c.y + 5))) {
+        console.log("Within C");
+      } else if (this.isWithin(mousePos, new Vector2(selection.d.x - 5, selection.d.y - 5), new Vector2(selection.d.x + 5, selection.d.y + 5))) {
+        console.log("Within D");
+      } else if (this.isWithin(mousePos, selection.a, selection.b)) {
+        // within center, but not a corner deadzone.
         this.activeSelection = selection;
       }
     }
@@ -104,7 +144,7 @@ export default class EditorCanvas extends Vue {
     const mousePos = this.getMousePos(this.editorCanvas, e);
     if (this.newSelection !== undefined) {
       // Set end point of new selection
-      this.activeSelection.setSecondary(mousePos);
+      this.activeSelection.setb(mousePos);
     } else if (this.previousMousePosition !== undefined) {
       // Move position of existing
       const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
@@ -147,13 +187,19 @@ export default class EditorCanvas extends Vue {
   drawRectangle(selection: Selection): void {
     if (!this.editorContext || !this.editorCanvas) return;
 
-    // inverse the absolute number based on current mouse position compared to start position.
-
-    const height: number = selection.a.x > selection.b.x ? -selection.absHeight : selection.absHeight;
-    const width: number = selection.a.y > selection.b.y ? -selection.absWidth : selection.absWidth;
-
     // Animate/Draw Here
-    this.editorContext.strokeRect(selection.a.x, selection.a.y, height, width);
+    this.editorContext.strokeRect(selection.a.x, selection.a.y, selection.relHeight, selection.relWidth);
+
+    // draw points, a,b,c,d - todo - proper debugger mode
+    this.editorContext.fillRect(selection.a.x - 3, selection.a.y - 3, 6, 6);
+    this.editorContext.fillRect(selection.b.x - 3, selection.b.y - 3, 6, 6);
+    this.editorContext.fillRect(selection.c.x - 3, selection.c.y - 3, 6, 6);
+    this.editorContext.fillRect(selection.d.x - 3, selection.d.y - 3, 6, 6);
+
+    this.editorContext.fillText('a', selection.a.x - 8, selection.a.y - 3);
+    this.editorContext.fillText('b', selection.b.x - 8, selection.b.y - 3);
+    this.editorContext.fillText('c', selection.c.x - 8, selection.c.y - 3);
+    this.editorContext.fillText('d', selection.d.x - 8, selection.d.y - 3);
   }
 
   getMousePos(canvas: HTMLCanvasElement, e: MouseEvent): Vector2 {
