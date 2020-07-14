@@ -21,7 +21,6 @@ class Selection {
   // todo - you shouldn't be able to set a and b directly.
   public a: Vector2;
   public b: Vector2; 
-  // todo - instead of calculate c/d on get, calculate on set.
 
   private _absHeight?: number;
   private _absWidth?: number;  
@@ -114,18 +113,17 @@ export default class EditorCanvas extends Vue {
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
     
-    console.log('start');
-    
     // todo - Check if selection is within the safe zone around a point, or within
     for (const selection of this.selections) {
-      // todo - this vector math is very verbose, would be nice to be able to do it cleaner without affectng the original class value.
-      if (this.isWithin(mousePos, new Vector2(selection.a.x - 5, selection.a.y - 5), new Vector2(selection.a.x + 5, selection.a.y + 5))) {
+      // todo - START HERE - the logic of 'active selection' will need to change to allow for mouth movement to be bound to a point.
+      // todo - ALSO - this vector math is very verbose, would be nice to be able to do it cleaner without affecting the original class value.
+      if (this.isWithin(mousePos, this.offsetPoint(selection.a, -5), this.offsetPoint(selection.a, 5))) {
         console.log("Within A");
-      } else if (this.isWithin(mousePos, new Vector2(selection.b.x - 5, selection.b.y - 5), new Vector2(selection.b.x + 5, selection.b.y + 5))) {
+      } else if (this.isWithin(mousePos, this.offsetPoint(selection.b, -5), this.offsetPoint(selection.b, 5))) {
         console.log("Within B");
-      } else if (this.isWithin(mousePos, new Vector2(selection.c.x - 5, selection.c.y - 5), new Vector2(selection.c.x + 5, selection.c.y + 5))) {
+      } else if (this.isWithin(mousePos, this.offsetPoint(selection.c, -5), this.offsetPoint(selection.c, 5))) {
         console.log("Within C");
-      } else if (this.isWithin(mousePos, new Vector2(selection.d.x - 5, selection.d.y - 5), new Vector2(selection.d.x + 5, selection.d.y + 5))) {
+      } else if (this.isWithin(mousePos, this.offsetPoint(selection.d, -5), this.offsetPoint(selection.d, 5))) {
         console.log("Within D");
       } else if (this.isWithin(mousePos, selection.a, selection.b)) {
         // within center, but not a corner deadzone.
@@ -200,6 +198,10 @@ export default class EditorCanvas extends Vue {
     this.editorContext.fillText('b', selection.b.x - 8, selection.b.y - 3);
     this.editorContext.fillText('c', selection.c.x - 8, selection.c.y - 3);
     this.editorContext.fillText('d', selection.d.x - 8, selection.d.y - 3);
+  }
+
+  offsetPoint(pos: Vector2, offset: number): Vector2 {
+    return new Vector2(pos.x + offset, pos.y + offset);
   }
 
   getMousePos(canvas: HTMLCanvasElement, e: MouseEvent): Vector2 {
