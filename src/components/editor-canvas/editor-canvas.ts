@@ -19,59 +19,87 @@ class Vector2 {
 
 class Selection {
   // todo - you shouldn't be able to set a and b directly.
-  public a: Vector2;
-  public b: Vector2; 
+  private _a: Vector2;
+  private _b: Vector2;
+  private _c: Vector2;
+  private _d: Vector2;
+
+  // these four points won't be very D.R.Y. or will they?
+  get a(): Vector2 {
+    return this._a;
+  }
+
+  // todo - when using setter, update related points, so A will update B/D but not C, etc, set their values by the rel height
+  set a(pos: Vector2) {
+    this._a = pos;
+
+    this._b = new Vector2(pos.x, this.c.y);
+    this._d = new Vector2(this.c.x, pos.y);
+  }
+
+  get b(): Vector2 {
+    return this._b;
+  }
+
+  set b(pos: Vector2) {
+    this._b = pos;
+
+    this._a = new Vector2(this.d.x, pos.y);
+    this._c = new Vector2(pos.x, this.d.y);
+  }
+
+  get c(): Vector2 {
+    return this._c;
+  }
+
+  set c(pos: Vector2) {
+    this._c = pos;
+
+    this._b = new Vector2(pos.x, this.a.y);
+    this._d = new Vector2(this.a.x, pos.y);
+  }
+
+  get d(): Vector2 {
+    return this._d;
+  }
+
+  set d(pos: Vector2) {
+    this._d = pos;
+
+    this._a = new Vector2(this.b.x, pos.y);
+    this._c = new Vector2(pos.x, this.b.y);
+  }
 
   private _absHeight?: number;
   private _absWidth?: number;  
 
   get absHeight(): number {
-    return Math.abs(this.a.x - this.b.x);
+    return Math.abs(this.a.x - this.c.x);
   }
 
   get absWidth(): number {
-    return Math.abs(this.a.y - this.b.y);
+    return Math.abs(this.a.y - this.c.y);
   }
 
   private _relHeight?: number;
   private _relWidth?: number;
 
   get relHeight(): number {
-    return this.a.x > this.b.x ? -this.absHeight : this.absHeight;
+    return this.a.x > this.c.x ? -this.absHeight : this.absHeight;
   }
 
   get relWidth(): number {
-    return this.a.y > this.b.y ? -this.absWidth : this.absWidth;
-  }
-
-  // todo - C&D are the two other points, these vectors are generated from the height/width
-  // todo - the names c/d may be a little confusing when trying to actuall get the data.
-  private _c?: Vector2;
-  private _d?: Vector2;
-
-  get c(): Vector2 {
-    const x = this.a.x + this.relHeight;
-    const y = this.a.y;
-    return new Vector2(x, y);
-  }
-
-  get d(): Vector2 {
-    const x = this.b.x - this.relHeight;
-    const y = this.b.y;
-    return new Vector2(x, y);
+    return this.a.y > this.c.y ? -this.absWidth : this.absWidth;
   }
 
   constructor(pos: Vector2) {
-    this.a = this.b = pos;
-  }
-
-  public setb(pos: Vector2): void {
-    this.b = pos;
+    this._a = this._b = this._c = this._d = pos;
   }
 
   public moveRelative(offset: Vector2): void {
+    // todo - this needs rewriting now I use four points
     this.a.add(offset);
-    this.b.add(offset);
+    this.c.add(offset);
   }
 }
 
@@ -85,6 +113,7 @@ export default class EditorCanvas extends Vue {
   public startTimestamp?: number;
   public newSelection?: Selection;
   public activeSelection?: Selection;
+  public activePoint?: "a" | "b" | "c" | "d";
   public selections: Array<Selection> = new Array<Selection>();
 
   private previousMousePosition?: Vector2;
@@ -112,27 +141,32 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext|| !this.editorCanvas) return;
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
-    
-    // todo - Check if selection is within the safe zone around a point, or within
+
+    console.log(this.activePoint);
+
+    // todo - this is working well, but is not very D.R.Y., need to refactor, should go through all notes and update things, lil bit of cleaning. 
     for (const selection of this.selections) {
-      // todo - START HERE - the logic of 'active selection' will need to change to allow for mouth movement to be bound to a point.
-      // todo - ALSO - this vector math is very verbose, would be nice to be able to do it cleaner without affecting the original class value.
-      if (this.isWithin(mousePos, this.offsetPoint(selection.a, -5), this.offsetPoint(selection.a, 5))) {
-        console.log("Within A");
-      } else if (this.isWithin(mousePos, this.offsetPoint(selection.b, -5), this.offsetPoint(selection.b, 5))) {
-        console.log("Within B");
-      } else if (this.isWithin(mousePos, this.offsetPoint(selection.c, -5), this.offsetPoint(selection.c, 5))) {
-        console.log("Within C");
-      } else if (this.isWithin(mousePos, this.offsetPoint(selection.d, -5), this.offsetPoint(selection.d, 5))) {
-        console.log("Within D");
-      } else if (this.isWithin(mousePos, selection.a, selection.b)) {
-        // within center, but not a corner deadzone.
+      if (this.isWithin(mousePos, this.offsetPoint(selection.a, -10), this.offsetPoint(selection.a, 10))) {
+        this.activePoint = "a";
         this.activeSelection = selection;
+      } else if (this.isWithin(mousePos, this.offsetPoint(selection.b, -10), this.offsetPoint(selection.b, 10))) {
+        this.activePoint = "b";
+        this.activeSelection = selection;
+      } else if (this.isWithin(mousePos, this.offsetPoint(selection.c, -10), this.offsetPoint(selection.c, 10))) {
+        this.activePoint = "c";
+        this.activeSelection = selection;
+      } else if (this.isWithin(mousePos, this.offsetPoint(selection.d, -10), this.offsetPoint(selection.d, 10))) {
+        this.activePoint = "d";
+        this.activeSelection = selection;
+      } else if (this.isWithin(mousePos, selection.a, selection.b)) {
+        // todo - temporarily disabled as I figure out point updating logic
+        // this.activeSelection = selection;
       }
     }
 
-    if (this.activeSelection === undefined) {
+    if (this.activeSelection === undefined && this.activePoint === undefined) {
       this.activeSelection = this.newSelection = new Selection(mousePos);
+      this.activePoint = "c";
     }
   }
 
@@ -140,14 +174,31 @@ export default class EditorCanvas extends Vue {
     if (!this.activeSelection || !this.editorCanvas) return;
 
     const mousePos = this.getMousePos(this.editorCanvas, e);
-    if (this.newSelection !== undefined) {
-      // Set end point of new selection
-      this.activeSelection.setb(mousePos);
-    } else if (this.previousMousePosition !== undefined) {
-      // Move position of existing
-      const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
-      this.activeSelection.moveRelative(offset);
+    if (this.activePoint) {
+      // todo - START HERE - active point should be a reference, but cannot set it as i'm essentially rewriting the reference.
+      // - how do I call the getter without overwriting the reference
+      // - one soluiton is to not save a reference to the point but an identifier, just need to make this not feel jank. Also not huge on this conditional chain and where else I may need to use it.
+      // - this appears to be working, minus my bad math in the setters, but I don't like how jank it is. Do another pass! Same concept, less if statements
+      if (this.activePoint === "a") {
+        this.activeSelection.a = mousePos;
+      } else if (this.activePoint === "b") {
+        this.activeSelection.b = mousePos;
+      } else if (this.activePoint === "c") {
+        this.activeSelection.c = mousePos;
+      } else if (this.activePoint === "d") {
+        this.activeSelection.d = mousePos;
+      }
     }
+
+    // todo - disable old active selection functionality as I do active point.
+    // if (this.newSelection !== undefined) {
+    //   // Set end point of new selection
+    //   this.activeSelection.c = mousePos;
+    // } else if (this.previousMousePosition !== undefined) {
+    //   // Move position of existing
+    //   const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
+    //   this.activeSelection.moveRelative(offset);
+    // }
 
     this.previousMousePosition = mousePos;
   }
@@ -159,7 +210,7 @@ export default class EditorCanvas extends Vue {
       this.selections.push(this.newSelection);
     }
     
-    this.previousMousePosition = this.activeSelection = this.newSelection = undefined;
+    this.previousMousePosition = this.activeSelection = this.newSelection = this.activePoint = undefined;
   }
 
   animationStep(timestamp: number): void {
