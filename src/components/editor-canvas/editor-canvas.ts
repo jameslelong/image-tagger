@@ -1,5 +1,12 @@
 import { Component, Vue } from "vue-property-decorator";
 
+enum SelectionPoint {
+  a,
+  b,
+  c,
+  d
+}
+
 class Vector2 {
   public x: number;
   public y: number;
@@ -113,7 +120,7 @@ export default class EditorCanvas extends Vue {
   public startTimestamp?: number;
   public newSelection?: Selection;
   public activeSelection?: Selection;
-  public activePoint?: "a" | "b" | "c" | "d";
+  public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
   public selections: Array<Selection> = new Array<Selection>();
 
   private previousMousePosition?: Vector2;
@@ -142,31 +149,35 @@ export default class EditorCanvas extends Vue {
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
 
-    console.log(this.activePoint);
+    console.log(this.activePoints);
+
+    // todo - allow for select multiple active points, this means I can update either all points, or just 2 or just 1.
 
     // todo - this is working well, but is not very D.R.Y., need to refactor, should go through all notes and update things, lil bit of cleaning. 
     for (const selection of this.selections) {
       if (this.isWithin(mousePos, this.offsetPoint(selection.a, -10), this.offsetPoint(selection.a, 10))) {
-        this.activePoint = "a";
-        this.activeSelection = selection;
+        this.activePoints.push(SelectionPoint.a);
       } else if (this.isWithin(mousePos, this.offsetPoint(selection.b, -10), this.offsetPoint(selection.b, 10))) {
-        this.activePoint = "b";
-        this.activeSelection = selection;
+        this.activePoints.push(SelectionPoint.b);
       } else if (this.isWithin(mousePos, this.offsetPoint(selection.c, -10), this.offsetPoint(selection.c, 10))) {
-        this.activePoint = "c";
-        this.activeSelection = selection;
+        this.activePoints.push(SelectionPoint.c);
       } else if (this.isWithin(mousePos, this.offsetPoint(selection.d, -10), this.offsetPoint(selection.d, 10))) {
-        this.activePoint = "d";
-        this.activeSelection = selection;
-      } else if (this.isWithin(mousePos, selection.a, selection.b)) {
+        this.activePoints.push(SelectionPoint.d);
+      } else if (this.isWithin(mousePos, selection.a, selection.c)) {
         // todo - temporarily disabled as I figure out point updating logic
         // this.activeSelection = selection;
+        // this.activePoints.push(SelectionPoint.a, SelectionPoint.c); // something like this?
+      }
+
+      if (this.activePoints.length > 0) {
+        this.activeSelection = selection;
+        break;
       }
     }
 
-    if (this.activeSelection === undefined && this.activePoint === undefined) {
+    if (this.activeSelection === undefined && this.activePoints.length === 0) {
       this.activeSelection = this.newSelection = new Selection(mousePos);
-      this.activePoint = "c";
+      this.activePoints.push(SelectionPoint.c);
     }
   }
 
@@ -174,22 +185,22 @@ export default class EditorCanvas extends Vue {
     if (!this.activeSelection || !this.editorCanvas) return;
 
     const mousePos = this.getMousePos(this.editorCanvas, e);
-    if (this.activePoint) {
-      // todo - START HERE - active point should be a reference, but cannot set it as i'm essentially rewriting the reference.
-      // - how do I call the getter without overwriting the reference
-      // - one soluiton is to not save a reference to the point but an identifier, just need to make this not feel jank. Also not huge on this conditional chain and where else I may need to use it.
-      // - this appears to be working, minus my bad math in the setters, but I don't like how jank it is. Do another pass! Same concept, less if statements
-      if (this.activePoint === "a") {
-        this.activeSelection.a = mousePos;
-      } else if (this.activePoint === "b") {
-        this.activeSelection.b = mousePos;
-      } else if (this.activePoint === "c") {
-        this.activeSelection.c = mousePos;
-      } else if (this.activePoint === "d") {
-        this.activeSelection.d = mousePos;
-      }
+    if (this.activePoints.includes(SelectionPoint.a)) {
+      this.activeSelection.a = mousePos;
     }
-
+    
+    if (this.activePoints.includes(SelectionPoint.b)) {
+      this.activeSelection.b = mousePos;
+    }
+    
+    if (this.activePoints.includes(SelectionPoint.c)) {
+      this.activeSelection.c = mousePos;
+    }
+    
+    if (this.activePoints.includes(SelectionPoint.d)) {
+      this.activeSelection.d = mousePos;
+    }
+    
     // todo - disable old active selection functionality as I do active point.
     // if (this.newSelection !== undefined) {
     //   // Set end point of new selection
@@ -209,8 +220,9 @@ export default class EditorCanvas extends Vue {
     if (this.newSelection !== undefined) {
       this.selections.push(this.newSelection);
     }
-    
-    this.previousMousePosition = this.activeSelection = this.newSelection = this.activePoint = undefined;
+
+    this.activePoints = new Array<SelectionPoint>();
+    this.previousMousePosition = this.activeSelection = this.newSelection = undefined;
   }
 
   animationStep(timestamp: number): void {
@@ -237,6 +249,13 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext || !this.editorCanvas) return;
 
     // Animate/Draw Here
+    this.editorContext.beginPath();
+    this.editorContext.moveTo(selection.a.x, selection.a.y);
+    this.editorContext.moveTo(selection.b.x, selection.b.y);
+    this.editorContext.moveTo(selection.c.x, selection.c.y);
+    this.editorContext.moveTo(selection.d.x, selection.d.y);
+    this.editorContext.closePath();
+
     this.editorContext.strokeRect(selection.a.x, selection.a.y, selection.relHeight, selection.relWidth);
 
     // draw points, a,b,c,d - todo - proper debugger mode
