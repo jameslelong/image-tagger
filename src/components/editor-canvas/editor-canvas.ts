@@ -15,13 +15,6 @@ class Vector2 {
     this.x = x;
     this.y = y;
   }
-
-  add(toAdd: Vector2): void {
-    // Add vector 2 to the vector 2's class. 
-    this.x += toAdd.x;
-    this.y += toAdd.y;
-  }
-  // todo - function that manages addition/subtraciton of two vector2's;
 }
 
 class Selection {
@@ -103,10 +96,9 @@ class Selection {
     this._a = this._b = this._c = this._d = pos;
   }
 
-  public moveRelative(offset: Vector2): void {
-    // todo - this needs rewriting now I use four points
-    this.a.add(offset);
-    this.c.add(offset);
+  public moveSelection(offset: Vector2): void {
+    this.a = new Vector2(this.a.x + offset.x, this.a.y += offset.y);
+    this.c = new Vector2(this.c.x + offset.x, this.c.y += offset.y);
   }
 }
 
@@ -164,9 +156,7 @@ export default class EditorCanvas extends Vue {
       } else if (this.isWithin(mousePos, this.offsetPoint(selection.d, -10), this.offsetPoint(selection.d, 10))) {
         this.activePoints.push(SelectionPoint.d);
       } else if (this.isWithin(mousePos, selection.a, selection.c)) {
-        // todo - temporarily disabled as I figure out point updating logic
-        // this.activeSelection = selection;
-        // this.activePoints.push(SelectionPoint.a, SelectionPoint.c); // something like this?
+        this.activePoints.push(SelectionPoint.a, SelectionPoint.c);
       }
 
       if (this.activePoints.length > 0) {
@@ -185,31 +175,29 @@ export default class EditorCanvas extends Vue {
     if (!this.activeSelection || !this.editorCanvas) return;
 
     const mousePos = this.getMousePos(this.editorCanvas, e);
-    if (this.activePoints.includes(SelectionPoint.a)) {
-      this.activeSelection.a = mousePos;
+
+    if (this.activePoints.length === 1) {
+      // only one point selected
+      if (this.activePoints.includes(SelectionPoint.a)) {
+        this.activeSelection.a = mousePos;
+      }
+      
+      if (this.activePoints.includes(SelectionPoint.b)) {
+        this.activeSelection.b = mousePos;
+      }
+      
+      if (this.activePoints.includes(SelectionPoint.c)) {
+        this.activeSelection.c = mousePos;
+      }
+      
+      if (this.activePoints.includes(SelectionPoint.d)) {
+        this.activeSelection.d = mousePos;
+      }
+    } else if (this.previousMousePosition !== undefined) {
+      // todo - move multiple poitns at once, this does sort of work but seems to be conflicting with getters as the shape sort of changes as you drag it. See if I can get this working with getters.
+      const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
+      this.activeSelection.moveSelection(offset);
     }
-    
-    if (this.activePoints.includes(SelectionPoint.b)) {
-      this.activeSelection.b = mousePos;
-    }
-    
-    if (this.activePoints.includes(SelectionPoint.c)) {
-      this.activeSelection.c = mousePos;
-    }
-    
-    if (this.activePoints.includes(SelectionPoint.d)) {
-      this.activeSelection.d = mousePos;
-    }
-    
-    // todo - disable old active selection functionality as I do active point.
-    // if (this.newSelection !== undefined) {
-    //   // Set end point of new selection
-    //   this.activeSelection.c = mousePos;
-    // } else if (this.previousMousePosition !== undefined) {
-    //   // Move position of existing
-    //   const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
-    //   this.activeSelection.moveRelative(offset);
-    // }
 
     this.previousMousePosition = mousePos;
   }
