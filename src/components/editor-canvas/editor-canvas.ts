@@ -18,18 +18,15 @@ class Vector2 {
 }
 
 class Selection {
-  // todo - you shouldn't be able to set a and b directly.
   private _a: Vector2;
   private _b: Vector2;
   private _c: Vector2;
   private _d: Vector2;
 
-  // these four points won't be very D.R.Y. or will they?
   get a(): Vector2 {
     return this._a;
   }
 
-  // todo - when using setter, update related points, so A will update B/D but not C, etc, set their values by the rel height
   set a(pos: Vector2) {
     this._a = pos;
 
@@ -96,14 +93,26 @@ class Selection {
     this._a = this._b = this._c = this._d = pos;
   }
 
+  public genericPointGet(sp: SelectionPoint): Vector2 {
+    switch (sp as SelectionPoint) {
+    case SelectionPoint.a:
+      return this.a;
+    case SelectionPoint.b:
+      return this.b;
+    case SelectionPoint.c:
+      return this.c;
+    case SelectionPoint.d:
+      return this.d;
+    }
+  }
+
   public moveSelection(offset: Vector2): void {
     this.a = new Vector2(this.a.x + offset.x, this.a.y += offset.y);
     this.c = new Vector2(this.c.x + offset.x, this.c.y += offset.y);
   }
 }
 
-// @Component needed?
-@Component
+@Component({})
 export default class EditorCanvas extends Vue {
   // https://class-component.vuejs.org/
   public editorCanvas?: HTMLCanvasElement;
@@ -115,6 +124,7 @@ export default class EditorCanvas extends Vue {
   public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
   public selections: Array<Selection> = new Array<Selection>();
 
+  private readonly offsetValue: number = 10;
   private previousMousePosition?: Vector2;
 
   mounted(): void {
@@ -141,21 +151,19 @@ export default class EditorCanvas extends Vue {
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
 
-    console.log(this.activePoints);
-
-    // todo - allow for select multiple active points, this means I can update either all points, or just 2 or just 1.
-
-    // todo - this is working well, but is not very D.R.Y., need to refactor, should go through all notes and update things, lil bit of cleaning. 
     for (const selection of this.selections) {
-      if (this.isWithin(mousePos, this.offsetPoint(selection.a, -10), this.offsetPoint(selection.a, 10))) {
-        this.activePoints.push(SelectionPoint.a);
-      } else if (this.isWithin(mousePos, this.offsetPoint(selection.b, -10), this.offsetPoint(selection.b, 10))) {
-        this.activePoints.push(SelectionPoint.b);
-      } else if (this.isWithin(mousePos, this.offsetPoint(selection.c, -10), this.offsetPoint(selection.c, 10))) {
-        this.activePoints.push(SelectionPoint.c);
-      } else if (this.isWithin(mousePos, this.offsetPoint(selection.d, -10), this.offsetPoint(selection.d, 10))) {
-        this.activePoints.push(SelectionPoint.d);
-      } else if (this.isWithin(mousePos, selection.a, selection.c)) {
+      // note - looping over an enum gives double the values there is due to it storing strings and numbers, this solutions of statically looping numbers is more ideal as it allows me to avoid do unneccessary loops with isNan() checks.
+      for (let i = 0, j = 3; i <= j; i++) {
+        
+        // Check individual point
+        if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet(i), this.offsetValue))) {
+          this.activePoints.push(i);
+          break;
+        }
+
+      }
+
+      if (this.activePoints.length === 0, this.isWithin(mousePos, selection.a, selection.c)) {
         this.activePoints.push(SelectionPoint.a, SelectionPoint.c);
       }
 
