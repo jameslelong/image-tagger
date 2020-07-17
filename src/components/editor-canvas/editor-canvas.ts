@@ -1,116 +1,6 @@
 import { Component, Vue } from "vue-property-decorator";
-
-enum SelectionPoint {
-  a,
-  b,
-  c,
-  d
-}
-
-class Vector2 {
-  public x: number;
-  public y: number;
-
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
-class Selection {
-  private _a: Vector2;
-  private _b: Vector2;
-  private _c: Vector2;
-  private _d: Vector2;
-
-  get a(): Vector2 {
-    return this._a;
-  }
-
-  set a(pos: Vector2) {
-    this._a = pos;
-
-    this._b = new Vector2(pos.x, this.c.y);
-    this._d = new Vector2(this.c.x, pos.y);
-  }
-
-  get b(): Vector2 {
-    return this._b;
-  }
-
-  set b(pos: Vector2) {
-    this._b = pos;
-
-    this._a = new Vector2(this.d.x, pos.y);
-    this._c = new Vector2(pos.x, this.d.y);
-  }
-
-  get c(): Vector2 {
-    return this._c;
-  }
-
-  set c(pos: Vector2) {
-    this._c = pos;
-
-    this._b = new Vector2(pos.x, this.a.y);
-    this._d = new Vector2(this.a.x, pos.y);
-  }
-
-  get d(): Vector2 {
-    return this._d;
-  }
-
-  set d(pos: Vector2) {
-    this._d = pos;
-
-    this._a = new Vector2(this.b.x, pos.y);
-    this._c = new Vector2(pos.x, this.b.y);
-  }
-
-  private _absHeight?: number;
-  private _absWidth?: number;  
-
-  get absHeight(): number {
-    return Math.abs(this.a.x - this.c.x);
-  }
-
-  get absWidth(): number {
-    return Math.abs(this.a.y - this.c.y);
-  }
-
-  private _relHeight?: number;
-  private _relWidth?: number;
-
-  get relHeight(): number {
-    return this.a.x > this.c.x ? -this.absHeight : this.absHeight;
-  }
-
-  get relWidth(): number {
-    return this.a.y > this.c.y ? -this.absWidth : this.absWidth;
-  }
-
-  constructor(pos: Vector2) {
-    this._a = this._b = this._c = this._d = pos;
-  }
-
-  public genericPointGet(sp: SelectionPoint): Vector2 {
-    switch (sp as SelectionPoint) {
-    case SelectionPoint.a:
-      return this.a;
-    case SelectionPoint.b:
-      return this.b;
-    case SelectionPoint.c:
-      return this.c;
-    case SelectionPoint.d:
-      return this.d;
-    }
-  }
-
-  public moveSelection(offset: Vector2): void {
-    this.a = new Vector2(this.a.x + offset.x, this.a.y += offset.y);
-    this.c = new Vector2(this.c.x + offset.x, this.c.y += offset.y);
-  }
-}
+import { Selection, SelectionPoint } from "@/types/selection";
+import Vector2 from "@/types/vector2";
 
 @Component({})
 export default class EditorCanvas extends Vue {
@@ -150,6 +40,9 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext|| !this.editorCanvas) return;
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
+    // todo - Start Here
+    // Better safezone handling (change deadzone to safezone)
+    // Checks need to done mouse move (need to update dragSelection function), so I can display a icon.
 
     for (const selection of this.selections) {
       // note - looping over an enum gives double the values there is due to it storing strings and numbers, this solutions of statically looping numbers is more ideal as it allows me to avoid do unneccessary loops with isNan() checks.
@@ -161,8 +54,16 @@ export default class EditorCanvas extends Vue {
           break;
         }
 
+        // todo - check edge, need to make sure edge doesn't overlay corner.
+        // Check between 2 points, using modulo to wrap number, so d wraps to a on final loop.
+        // if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet((i + 1) % 4), this.offsetValue))) {
+        //   this.activePoints.push(i, (i + 1) % 4);
+        //   break;
+        // }
+
       }
 
+      // todo - When offsetting this position, I need to a ccount for if a/b are top/bottom or bottom/top.
       if (this.activePoints.length === 0, this.isWithin(mousePos, selection.a, selection.c)) {
         this.activePoints.push(SelectionPoint.a, SelectionPoint.c);
       }
@@ -186,6 +87,8 @@ export default class EditorCanvas extends Vue {
 
     if (this.activePoints.length === 1) {
       // only one point selected
+
+      // todo - put this in a loop
       if (this.activePoints.includes(SelectionPoint.a)) {
         this.activeSelection.a = mousePos;
       }
