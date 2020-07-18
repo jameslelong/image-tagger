@@ -96,8 +96,20 @@ export class Selection {
     }
   }
 
-  public moveSelection(offset: Vector2): void {
-    this.a = new Vector2(this.a.x + offset.x, this.a.y += offset.y);
-    this.c = new Vector2(this.c.x + offset.x, this.c.y += offset.y);
+  public genericPointSet(sp: SelectionPoint, pos: Vector2): void {
+    switch (sp as SelectionPoint) {
+    case SelectionPoint.a:
+      this.a = pos;
+      break;
+    case SelectionPoint.b:
+      this.b = pos;
+      break;
+    case SelectionPoint.c:
+      this.c = pos;
+      break;
+    case SelectionPoint.d:
+      this.d = pos;
+      break;
+    }
   }
 }

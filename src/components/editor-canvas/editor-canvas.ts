@@ -15,7 +15,7 @@ export default class EditorCanvas extends Vue {
   public selections: Array<Selection> = new Array<Selection>();
 
   private readonly offsetValue: number = 10;
-  private previousMousePosition?: Vector2;
+  private previousMousePos?: Vector2;
 
   mounted(): void {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
@@ -40,6 +40,7 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext|| !this.editorCanvas) return;
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
+
     // todo - Start Here
     // Better safezone handling (change deadzone to safezone)
     // Checks need to done mouse move (need to update dragSelection function), so I can display a icon.
@@ -85,32 +86,19 @@ export default class EditorCanvas extends Vue {
 
     const mousePos = this.getMousePos(this.editorCanvas, e);
 
-    if (this.activePoints.length === 1) {
-      // only one point selected
-
-      // todo - put this in a loop
-      if (this.activePoints.includes(SelectionPoint.a)) {
-        this.activeSelection.a = mousePos;
+    if (this.previousMousePos !== undefined) {
+      const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+      for (let i = 0, j = 3; i <= j; i++) {
+        const point = this.activeSelection.genericPointGet(i);
+        const offsetPos = new Vector2(point.x + offset.x, point.y + offset.y);
+  
+        if (this.activePoints.includes(i)) {
+          this.activeSelection.genericPointSet(i, offsetPos);
+        }  
       }
-      
-      if (this.activePoints.includes(SelectionPoint.b)) {
-        this.activeSelection.b = mousePos;
-      }
-      
-      if (this.activePoints.includes(SelectionPoint.c)) {
-        this.activeSelection.c = mousePos;
-      }
-      
-      if (this.activePoints.includes(SelectionPoint.d)) {
-        this.activeSelection.d = mousePos;
-      }
-    } else if (this.previousMousePosition !== undefined) {
-      // todo - move multiple poitns at once, this does sort of work but seems to be conflicting with getters as the shape sort of changes as you drag it. See if I can get this working with getters.
-      const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePosition.x, mousePos.y - this.previousMousePosition.y);
-      this.activeSelection.moveSelection(offset);
     }
 
-    this.previousMousePosition = mousePos;
+    this.previousMousePos = mousePos;
   }
 
   endSelection(e: MouseEvent): void {
@@ -121,7 +109,7 @@ export default class EditorCanvas extends Vue {
     }
 
     this.activePoints = new Array<SelectionPoint>();
-    this.previousMousePosition = this.activeSelection = this.newSelection = undefined;
+    this.previousMousePos = this.activeSelection = this.newSelection = undefined;
   }
 
   animationStep(timestamp: number): void {
