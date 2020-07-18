@@ -1,7 +1,7 @@
 <template>
   <canvas
     id="editor-canvas" ref="editor-canvas"
-    @mousedown="beginSelection" @mouseup="endSelection" @mousemove="dragSelection">
+    @mousedown="beginSelection" @mouseup="endSelection" @mousemove="mouseMove">
   </canvas>
 </template>
 

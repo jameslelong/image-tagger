@@ -40,65 +40,42 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext|| !this.editorCanvas) return;
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
+    const selectionCheck = this.checkSelectionAnchors(mousePos);
 
-    // todo - Start Here
-    // Better safezone handling (change deadzone to safezone)
-    // Checks need to done mouse move (need to update dragSelection function), so I can display a icon.
-
-    for (const selection of this.selections) {
-      // note - looping over an enum gives double the values there is due to it storing strings and numbers, this solutions of statically looping numbers is more ideal as it allows me to avoid do unneccessary loops with isNan() checks.
-      for (let i = 0, j = 3; i <= j; i++) {
-        
-        // Check individual point
-        if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet(i), this.offsetValue))) {
-          this.activePoints.push(i);
-          break;
-        }
-
-        // todo - check edge, need to make sure edge doesn't overlay corner.
-        // Check between 2 points, using modulo to wrap number, so d wraps to a on final loop.
-        // if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet((i + 1) % 4), this.offsetValue))) {
-        //   this.activePoints.push(i, (i + 1) % 4);
-        //   break;
-        // }
-
-      }
-
-      // todo - When offsetting this position, I need to a ccount for if a/b are top/bottom or bottom/top.
-      if (this.activePoints.length === 0, this.isWithin(mousePos, selection.a, selection.c)) {
-        this.activePoints.push(SelectionPoint.a, SelectionPoint.c);
-      }
-
-      if (this.activePoints.length > 0) {
-        this.activeSelection = selection;
-        break;
-      }
+    if (selectionCheck) {
+      this.activeSelection = selectionCheck.foundSelection;
+      this.activePoints = selectionCheck.foundPoints; 
     }
 
+    // Create New Selection
     if (this.activeSelection === undefined && this.activePoints.length === 0) {
       this.activeSelection = this.newSelection = new Selection(mousePos);
       this.activePoints.push(SelectionPoint.c);
     }
   }
 
-  dragSelection(e: MouseEvent): void {
-    if (!this.activeSelection || !this.editorCanvas) return;
+  mouseMove(e: MouseEvent): void {
+    if (!this.editorContext|| !this.editorCanvas) return;
 
     const mousePos = this.getMousePos(this.editorCanvas, e);
 
-    if (this.previousMousePos !== undefined) {
-      const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
-      for (let i = 0, j = 3; i <= j; i++) {
-        const point = this.activeSelection.genericPointGet(i);
-        const offsetPos = new Vector2(point.x + offset.x, point.y + offset.y);
-  
-        if (this.activePoints.includes(i)) {
-          this.activeSelection.genericPointSet(i, offsetPos);
-        }  
+    if (!this.activeSelection) {
+      this.checkSelectionAnchors(mousePos);
+    } else {
+      if (this.previousMousePos && this.activePoints) {
+        const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+        for (let i = 0, j = 3; i <= j; i++) {
+          const point = this.activeSelection.genericPointGet(i);
+          const offsetPos = new Vector2(point.x + offset.x, point.y + offset.y);
+    
+          if (this.activePoints.includes(i)) {
+            this.activeSelection.genericPointSet(i, offsetPos);
+          }
+        }
       }
+  
+      this.previousMousePos = mousePos;   
     }
-
-    this.previousMousePos = mousePos;
   }
 
   endSelection(e: MouseEvent): void {
@@ -110,6 +87,55 @@ export default class EditorCanvas extends Vue {
 
     this.activePoints = new Array<SelectionPoint>();
     this.previousMousePos = this.activeSelection = this.newSelection = undefined;
+  }
+
+  
+  checkSelectionAnchors(mousePos: Vector2): { foundPoints: Array<SelectionPoint>, foundSelection: Selection } | void {
+    if (!this.editorContext|| !this.editorCanvas) return;
+
+    const foundPoints = new Array<SelectionPoint>();
+    let foundSelection: Selection | undefined;
+
+    for (const selection of this.selections) {
+      // Loop each point of selection in loop
+      for (let i = 0, j = 3; i <= j; i++) {
+        // Check Point
+        if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet(i), this.offsetValue))) {
+          foundPoints.push(i);
+          this.editorCanvas.style.cursor = "nesw-resize"; // bottom left to top right
+          //this.editorCanvas.style.cursor = "nwse-resize"; // bottom right to top left - todo - how to figure out which icon to display?
+          break;
+        }
+
+        // Check Edge - Using modulo to wrap number, so 'd' wraps to 'a' on final loop. 
+        // BUG - Appear to be able to select both an Edge & Whole Selection if I am close enough to a edge. This will be fixed by offsets I imagine, but it shouldn't be happening regardless?
+        if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet((i + 1) % 4), this.offsetValue))) {
+          foundPoints.push(i, (i + 1) % 4);
+          this.editorCanvas.style.cursor = "ew-resize";
+          // this.editorCanvas.style.cursor = "ns-resize"; // todo - how to figure out which icon to display?
+          break;
+        }
+
+      }
+
+      // todo - When offsetting these vectors for the safe zone, I need to a ccount for if a/b are top/bottom or bottom/top.
+      // Check Whole Selection
+      if (foundPoints.length === 0, this.isWithin(mousePos, selection.a, selection.c)) {
+        foundPoints.push(SelectionPoint.a, SelectionPoint.c);
+        this.editorCanvas.style.cursor = "move";
+      }
+
+      if (foundPoints.length > 0) {
+        foundSelection = selection;
+        break;
+      }
+    }
+
+    if (foundPoints.length > 0 && foundSelection) {
+      return { foundPoints: foundPoints, foundSelection: foundSelection };
+    } else {
+      this.editorCanvas.style.cursor = "default";
+    }
   }
 
   animationStep(timestamp: number): void {
