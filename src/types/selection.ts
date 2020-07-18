@@ -20,8 +20,8 @@ export class Selection {
   set a(pos: Vector2) {
     this._a = pos;
 
-    this._b = new Vector2(pos.x, this.c.y);
-    this._d = new Vector2(this.c.x, pos.y);
+    this._b = new Vector2(this.c.x, pos.y);
+    this._d = new Vector2(pos.x, this.c.y);
   }
 
   get b(): Vector2 {
@@ -53,8 +53,8 @@ export class Selection {
   set d(pos: Vector2) {
     this._d = pos;
 
-    this._a = new Vector2(this.b.x, pos.y);
-    this._c = new Vector2(pos.x, this.b.y);
+    this._a = new Vector2(pos.x, this.b.y);
+    this._c = new Vector2(this.b.x, pos.y);
   }
 
   private _absHeight ? : number;
