@@ -14,7 +14,7 @@ export default class EditorCanvas extends Vue {
   public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
   public selections: Array<Selection> = new Array<Selection>();
 
-  private readonly offsetValue: number = 10;
+  private readonly OFFSET_VALUE: number = 10;
   private previousMousePos?: Vector2;
 
   mounted(): void {
@@ -97,30 +97,36 @@ export default class EditorCanvas extends Vue {
     let foundSelection: Selection | undefined;
 
     for (const selection of this.selections) {
-      // Loop each point of selection in loop
       for (let i = 0, j = 3; i <= j; i++) {
+        const currPoint = selection.genericPointGet(i);
+        const nextPoint = selection.genericPointGet((i + 1) % 4);
+
         // Check Point
-        if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet(i), this.offsetValue))) {
+        if (this.isWithin(mousePos, this.offsetVectorByNumber(currPoint, -this.OFFSET_VALUE), this.offsetVectorByNumber(currPoint, this.OFFSET_VALUE))) {
           foundPoints.push(i);
-          this.editorCanvas.style.cursor = "nesw-resize"; // bottom left to top right
-          //this.editorCanvas.style.cursor = "nwse-resize"; // bottom right to top left - todo - how to figure out which icon to display?
-          break;
-        }
 
-        // Check Edge - Using modulo to wrap number, so 'd' wraps to 'a' on final loop. 
-        // BUG - Appear to be able to select both an Edge & Whole Selection if I am close enough to a edge. This will be fixed by offsets I imagine, but it shouldn't be happening regardless?
-        if (this.isWithin(mousePos, this.offsetPoint(selection.genericPointGet(i), -this.offsetValue), this.offsetPoint(selection.genericPointGet((i + 1) % 4), this.offsetValue))) {
-          foundPoints.push(i, (i + 1) % 4);
-          this.editorCanvas.style.cursor = "ew-resize";
-          // this.editorCanvas.style.cursor = "ns-resize"; // todo - how to figure out which icon to display?
-          break;
+          // Set cursor style - accounts for when points are flipped
+          if (selection.a.x < selection.c.x === selection.a.y < selection.c.y) {
+            this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nesw-resize" : "nwse-resize";
+          } else {
+            this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nwse-resize" : "nesw-resize";
+          }
         }
-
       }
 
-      // todo - When offsetting these vectors for the safe zone, I need to a ccount for if a/b are top/bottom or bottom/top.
       // Check Whole Selection
-      if (foundPoints.length === 0, this.isWithin(mousePos, selection.a, selection.c)) {
+      let aOffset: Vector2;
+      let cOffset: Vector2;
+      // Offset 'a', 'c' values depending on their relative position to each other.
+      if (selection.a.x < selection.c.x && selection.a.y < selection.c.y) {
+        aOffset = this.offsetVectorByNumber(selection.a, this.OFFSET_VALUE / 2);
+        cOffset = this.offsetVectorByNumber(selection.c, -this.OFFSET_VALUE / 2);
+      } else {
+        aOffset = this.offsetVectorByNumber(selection.a, -this.OFFSET_VALUE / 2);
+        cOffset = this.offsetVectorByNumber(selection.c, this.OFFSET_VALUE / 2);
+      }
+      
+      if (foundPoints.length === 0, this.isWithin(mousePos, aOffset, cOffset)) {
         foundPoints.push(SelectionPoint.a, SelectionPoint.c);
         this.editorCanvas.style.cursor = "move";
       }
@@ -183,7 +189,7 @@ export default class EditorCanvas extends Vue {
     this.editorContext.fillText('d', selection.d.x - 8, selection.d.y - 3);
   }
 
-  offsetPoint(pos: Vector2, offset: number): Vector2 {
+  offsetVectorByNumber(pos: Vector2, offset: number): Vector2 {
     return new Vector2(pos.x + offset, pos.y + offset);
   }
 
