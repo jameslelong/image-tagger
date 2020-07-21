@@ -9,5 +9,12 @@ module.exports = {
         "types": path.resolve(__dirname, "src/types")
       }
     }
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        prependData: "@import 'src/assets/styles/main.scss';"
+      }
+    }
   }
 };

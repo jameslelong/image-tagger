@@ -2,27 +2,53 @@
   height: 110px;
   width: 100%;
 
-  outline: 1px solid red;
+  display: flex;
+  align-items: center;
+
+  background-color: $brand-darker;
 }
 
+.carousel-button-wrap {
+  height: 100%;
+  width: 80px;
 
-// Image Upload
-#image-upload {
-  display: inline-block;
-  border: 2px dashed #ccc;
-  border-radius: 10px;
-  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  &.highlight {
-    border-color: #333;
+.carousel-button {
+  height: 40px;
+  width: 40px;
+
+  background-color: $brand-primary;
+  border-radius: 20px;
+  border: none;
+  color: #fff;
+}
+
+#carousel-inner {
+  height: calc(100% - 20px);
+  width: calc(100% - 160px);
+
+  display: flex;
+  flex-direction: row;
+}
+
+.carousel-image {
+  height: 100%;
+  width: 160px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-right: 10px;
+
+  // todo - images are stretching, I need to go over all this CSS tonight.
+  img {
+    height: 100%;
+    width: 100%;
+  }
+
+  &:active {
+    border: 2px solid #fff; // todo - active image functionality
   }
 }
-
-#upload-input {
-  
-}
-
-#upload-label {
-
-}
-
