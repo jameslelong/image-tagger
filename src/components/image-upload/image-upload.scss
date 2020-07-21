@@ -1,0 +1,18 @@
+#image-upload {
+  display: inline-block;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  padding: 20px;
+
+  &.highlight {
+    border-color: #333;
+  }
+}
+
+#upload-input {
+  
+}
+
+#upload-label {
+
+}
