@@ -23,6 +23,12 @@
       ],
       "views/*": [
         "src/views/*"
+      ],
+      "assets/*": [
+        "src/assets/*"
+      ],
+      "types/*": [
+        "src/types/*"
       ]
     },
     "lib": [

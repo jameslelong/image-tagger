@@ -1,7 +1,8 @@
 <template>
-  <div id="home">
+  <section id="home">
+    <carousel></carousel>
     <editor-canvas></editor-canvas>
-  </div>
+  </section>
 </template>
 
 <script src="./home.ts"></script>

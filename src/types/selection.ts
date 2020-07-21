@@ -57,9 +57,6 @@ export class Selection {
     this._c = new Vector2(this.b.x, pos.y);
   }
 
-  private _absHeight ? : number;
-  private _absWidth ? : number;
-
   get absHeight(): number {
     return Math.abs(this.a.x - this.c.x);
   }
@@ -67,9 +64,6 @@ export class Selection {
   get absWidth(): number {
     return Math.abs(this.a.y - this.c.y);
   }
-
-  private _relHeight ? : number;
-  private _relWidth ? : number;
 
   get relHeight(): number {
     return this.a.x > this.c.x ? -this.absHeight : this.absHeight;

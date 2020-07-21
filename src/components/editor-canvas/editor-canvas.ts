@@ -1,12 +1,13 @@
 import { Component, Vue } from "vue-property-decorator";
-import { Selection, SelectionPoint } from "@/types/selection";
-import Vector2 from "@/types/vector2";
 
-@Component({})
+import { Selection, SelectionPoint } from "types/selection";
+import Vector2 from "types/vector2";
+
+@Component
 export default class EditorCanvas extends Vue {
   // https://class-component.vuejs.org/
   public editorCanvas?: HTMLCanvasElement;
-  public editorContext?: CanvasRenderingContext2D
+  public editorContext?: CanvasRenderingContext2D;
 
   public startTimestamp?: number;
   public newSelection?: Selection;
@@ -88,7 +89,6 @@ export default class EditorCanvas extends Vue {
     this.activePoints = new Array<SelectionPoint>();
     this.previousMousePos = this.activeSelection = this.newSelection = undefined;
   }
-
   
   checkSelectionAnchors(mousePos: Vector2): { foundPoints: Array<SelectionPoint>, foundSelection: Selection } | void {
     if (!this.editorContext|| !this.editorCanvas) return;
