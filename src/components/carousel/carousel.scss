@@ -27,28 +27,45 @@
   color: #fff;
 }
 
-#carousel-inner {
-  height: calc(100% - 20px);
+#carousel-main {
+  height: 100%;
   width: calc(100% - 160px);
+  padding: 10px 0;
 
   display: flex;
   flex-direction: row;
 }
 
-.carousel-image {
+.carousel-image-button {
+  position: relative;
   height: 100%;
   width: 160px;
   border-radius: 5px;
   overflow: hidden;
   margin-right: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 
-  // todo - images are stretching, I need to go over all this CSS tonight.
   img {
     height: 100%;
     width: 100%;
+    object-fit: cover;
   }
 
-  &:active {
-    border: 2px solid #fff; // todo - active image functionality
+  .image-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 5px;
+  }
+
+  &.selected {
+    .image-overlay {
+      border: 2px solid #fff;
+    }
   }
 }

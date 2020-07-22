@@ -11,10 +11,12 @@ export class Tag {
 }
 
 export class Image {
+  public readonly id: number;
   public readonly encodedImage: string;
   public readonly tags = new Array<Tag>();
-
-  constructor(encodedImage: string) {
+  
+  constructor(encodedImage: string, id: number) {
+    this.id = id;
     this.encodedImage = encodedImage;
   }
 }

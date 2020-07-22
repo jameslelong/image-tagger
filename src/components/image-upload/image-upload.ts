@@ -10,7 +10,6 @@ export default class ImageUpload extends Vue {
   }
 
   onDrop(e: DragEvent): void {
-    // todo -whats the t ype
     e.stopPropagation();
     e.preventDefault();
 
@@ -39,7 +38,7 @@ export default class ImageUpload extends Vue {
   }
 
   createImage(file: File): void {
-    if (!file.type.match("image.*")) {
+    if (!file.type.match("image/jpeg") && !file.type.match("image/png")) {
       // todo - toaster alert that some of the images uploaded are invalid.
       return;
     }

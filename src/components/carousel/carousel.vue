@@ -6,10 +6,13 @@
         <div class="carousel-button-wrap"> <!-- todo turn this entire wrap into the button? -->
             <button class="carousel-button">L</button>
         </div>
-        <div id="carousel-inner">
-            <div class="carousel-image" v-for="image in images" :key="image" >
+        <div id="carousel-main">
+            <button
+                class="carousel-image-button" v-for="image in images" :key="image.encodedImage" 
+                v-on:click="selectImage(image)" v-bind:class="{ selected: selectedImage.encodedImage === image.encodedImage }">
                 <img :src="image.encodedImage">
-            </div>
+                <div class="image-overlay"></div>
+            </button>
         </div>
         <div class="carousel-button-wrap">
             <button class="carousel-button">R</button>
