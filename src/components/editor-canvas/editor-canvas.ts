@@ -1,12 +1,12 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
-import { Image, ImageTag } from "types/image";
+import { EditorImage, EditorImageTag } from "types/image";
 
 import { Selection, SelectionPoint } from "types/selection";
 import Vector2 from "types/vector2";
 
 @Component
 export default class EditorCanvas extends Vue {
-  @Prop(Image) readonly selectedImage?: Image;
+  @Prop(EditorImage) readonly selectedImage?: EditorImage;
 
   private readonly OFFSET_VALUE: number = 10;
   
@@ -33,13 +33,16 @@ export default class EditorCanvas extends Vue {
   }
 
   @Watch('selectedImage')
-  onSelectedImageChanged(image: Image) {
+  onSelectedImageChanged(image: EditorImage) {
     if (!this.editorContext) return;
+
+    const iamge = new Image();
 
     console.log('drawn');
     console.log(image);
     // https://github.com/kaorun343/vue-property-decorator#-watchpath-string-options-watchoptions---decorator
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+    // https://stackoverflow.com/questions/4409445/base64-png-data-to-html5-canvas - draw from Base64
   }
 
   isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
@@ -50,7 +53,7 @@ export default class EditorCanvas extends Vue {
   }
 
   beginSelection(e: MouseEvent): void {
-    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage) return;
+    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage) return;
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
     const selectionCheck = this.checkSelectionAnchors(mousePos);
@@ -109,8 +112,6 @@ export default class EditorCanvas extends Vue {
   createNewSelection(selection: Selection) {
     if (!this.selectedImage) return;
 
-    console.log(this.selectedImage);
-
     // todo - prompt for user to select tag from existing tag list before firing this function?
     // todo - should I just pass a ref to the tag itself? Instead of searching for it?
     const devTagName = "tag-name";
@@ -118,7 +119,7 @@ export default class EditorCanvas extends Vue {
 
     if (!foundTag) {
       // Create Tag
-      const newTag = new ImageTag(devTagName);
+      const newTag = new EditorImageTag(devTagName);
       const tagIndex = this.selectedImage.tags.push(newTag);
       foundTag = this.selectedImage.tags[tagIndex - 1];
     }
