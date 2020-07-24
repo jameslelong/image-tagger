@@ -7,6 +7,7 @@ import Vector2 from "types/vector2";
 @Component
 export default class EditorCanvas extends Vue {
   @Prop(EditorImage) readonly selectedImage?: EditorImage;
+  public canvasImage?: HTMLImageElement;
 
   private readonly OFFSET_VALUE: number = 10;
   
@@ -36,13 +37,8 @@ export default class EditorCanvas extends Vue {
   onSelectedImageChanged(image: EditorImage) {
     if (!this.editorContext) return;
 
-    const iamge = new Image();
-
-    console.log('drawn');
-    console.log(image);
-    // https://github.com/kaorun343/vue-property-decorator#-watchpath-string-options-watchoptions---decorator
-    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-    // https://stackoverflow.com/questions/4409445/base64-png-data-to-html5-canvas - draw from Base64
+    this.canvasImage = new Image();
+    this.canvasImage.src = image.encodedImage;
   }
 
   isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
@@ -191,11 +187,19 @@ export default class EditorCanvas extends Vue {
     
     // Redraw canvas
     if (this.editorContext && this.editorCanvas && this.selectedImage) {
+
+      // Clear Canvas
       this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
+
+      // Draw image
+      this.drawImage();
+
+      // Draw new selection rectangle
       if (this.newSelection) {
         this.drawRectangle(this.newSelection);
       }
       
+      // Draw selected image's selection rectangles
       for (const tag of this.selectedImage.tags) {
         for (const selection of tag.selections) {
           this.drawRectangle(selection);
@@ -204,6 +208,14 @@ export default class EditorCanvas extends Vue {
     }
 
     window.requestAnimationFrame(this.animationStep);
+  }
+
+  drawImage(): void {
+    if (!this.editorContext || !this.canvasImage) return;
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+    // todo - scale images, center, etc...
+    this.editorContext.drawImage(this.canvasImage, 0, 0);
   }
 
   drawRectangle(selection: Selection): void {
