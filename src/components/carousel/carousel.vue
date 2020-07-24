@@ -8,8 +8,8 @@
         </div>
         <div id="carousel-main">
             <button
-                class="carousel-image-button" v-for="image in images" :key="image.encodedImage" 
-                v-on:click="selectImage(image)" v-bind:class="{ selected: selectedImage.encodedImage === image.encodedImage }">
+                class="carousel-image-button" v-for="image in images" :key="image.id" 
+                v-on:click="selectImage(image)" v-bind:class="{ selected: selectedImage.id === image.id }">
                 <img :src="image.encodedImage">
                 <div class="image-overlay"></div>
             </button>

@@ -1,11 +1,15 @@
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { Image, ImageTag } from "types/image";
 
 import { Selection, SelectionPoint } from "types/selection";
 import Vector2 from "types/vector2";
 
 @Component
 export default class EditorCanvas extends Vue {
-  // https://class-component.vuejs.org/
+  @Prop(Image) readonly selectedImage?: Image;
+
+  private readonly OFFSET_VALUE: number = 10;
+  
   public editorCanvas?: HTMLCanvasElement;
   public editorContext?: CanvasRenderingContext2D;
 
@@ -13,9 +17,7 @@ export default class EditorCanvas extends Vue {
   public newSelection?: Selection;
   public activeSelection?: Selection;
   public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
-  public selections: Array<Selection> = new Array<Selection>();
 
-  private readonly OFFSET_VALUE: number = 10;
   private previousMousePos?: Vector2;
 
   mounted(): void {
@@ -30,6 +32,16 @@ export default class EditorCanvas extends Vue {
     window.requestAnimationFrame(this.animationStep);
   }
 
+  @Watch('selectedImage')
+  onSelectedImageChanged(image: Image) {
+    if (!this.editorContext) return;
+
+    console.log('drawn');
+    console.log(image);
+    // https://github.com/kaorun343/vue-property-decorator#-watchpath-string-options-watchoptions---decorator
+    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+  }
+
   isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
     const withinX = (a.x < b.x && a.x > c.x) || (a.x > b.x && a.x < c.x);
     const withinY = (a.y < b.y && a.y > c.y) || (a.y > b.y && a.y < c.y);
@@ -38,7 +50,7 @@ export default class EditorCanvas extends Vue {
   }
 
   beginSelection(e: MouseEvent): void {
-    if (!this.editorContext|| !this.editorCanvas) return;
+    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage) return;
     
     const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
     const selectionCheck = this.checkSelectionAnchors(mousePos);
@@ -80,60 +92,86 @@ export default class EditorCanvas extends Vue {
   }
 
   endSelection(e: MouseEvent): void {
-    if (!this.activeSelection) return;
+    if (!this.activeSelection || !this.selectedImage) return;
 
-    if (this.newSelection !== undefined) {
-      this.selections.push(this.newSelection);
+    if (this.newSelection) {
+      this.createNewSelection(this.newSelection);
     }
 
     this.activePoints = new Array<SelectionPoint>();
     this.previousMousePos = this.activeSelection = this.newSelection = undefined;
   }
+
+  /**
+   * Add selection to selected images tag array by specific tag name
+   * @param selection
+   */
+  createNewSelection(selection: Selection) {
+    if (!this.selectedImage) return;
+
+    console.log(this.selectedImage);
+
+    // todo - prompt for user to select tag from existing tag list before firing this function?
+    // todo - should I just pass a ref to the tag itself? Instead of searching for it?
+    const devTagName = "tag-name";
+    let foundTag = this.selectedImage.tags.find(tag => tag.name === devTagName);
+
+    if (!foundTag) {
+      // Create Tag
+      const newTag = new ImageTag(devTagName);
+      const tagIndex = this.selectedImage.tags.push(newTag);
+      foundTag = this.selectedImage.tags[tagIndex - 1];
+    }
+
+    foundTag.selections.push(selection);
+  }
   
   checkSelectionAnchors(mousePos: Vector2): { foundPoints: Array<SelectionPoint>, foundSelection: Selection } | void {
-    if (!this.editorContext|| !this.editorCanvas) return;
+    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage) return;
 
     const foundPoints = new Array<SelectionPoint>();
     let foundSelection: Selection | undefined;
 
-    for (const selection of this.selections) {
-      for (let i = 0, j = 3; i <= j; i++) {
-        const currPoint = selection.genericPointGet(i);
-        const nextPoint = selection.genericPointGet((i + 1) % 4);
+    for (const tag of this.selectedImage.tags) {
+      for (const selection of tag.selections) {
+        for (let i = 0, j = 3; i <= j; i++) {
+          const currPoint = selection.genericPointGet(i);
+          const nextPoint = selection.genericPointGet((i + 1) % 4);
 
-        // Check Point
-        if (this.isWithin(mousePos, this.offsetVectorByNumber(currPoint, -this.OFFSET_VALUE), this.offsetVectorByNumber(currPoint, this.OFFSET_VALUE))) {
-          foundPoints.push(i);
+          // Check Point
+          if (this.isWithin(mousePos, this.offsetVectorByNumber(currPoint, -this.OFFSET_VALUE), this.offsetVectorByNumber(currPoint, this.OFFSET_VALUE))) {
+            foundPoints.push(i);
 
-          // Set cursor style - accounts for when points are flipped
-          if (selection.a.x < selection.c.x === selection.a.y < selection.c.y) {
-            this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nesw-resize" : "nwse-resize";
-          } else {
-            this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nwse-resize" : "nesw-resize";
+            // Set cursor style - accounts for when points are flipped
+            if (selection.a.x < selection.c.x === selection.a.y < selection.c.y) {
+              this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nesw-resize" : "nwse-resize";
+            } else {
+              this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nwse-resize" : "nesw-resize";
+            }
           }
         }
-      }
 
-      // Check Whole Selection
-      let aOffset: Vector2;
-      let cOffset: Vector2;
-      // Offset 'a', 'c' values depending on their relative position to each other.
-      if (selection.a.x < selection.c.x && selection.a.y < selection.c.y) {
-        aOffset = this.offsetVectorByNumber(selection.a, this.OFFSET_VALUE / 2);
-        cOffset = this.offsetVectorByNumber(selection.c, -this.OFFSET_VALUE / 2);
-      } else {
-        aOffset = this.offsetVectorByNumber(selection.a, -this.OFFSET_VALUE / 2);
-        cOffset = this.offsetVectorByNumber(selection.c, this.OFFSET_VALUE / 2);
-      }
-      
-      if (foundPoints.length === 0, this.isWithin(mousePos, aOffset, cOffset)) {
-        foundPoints.push(SelectionPoint.a, SelectionPoint.c);
-        this.editorCanvas.style.cursor = "move";
-      }
+        // Check Whole Selection
+        let aOffset: Vector2;
+        let cOffset: Vector2;
+        // Offset 'a', 'c' values depending on their relative position to each other.
+        if (selection.a.x < selection.c.x && selection.a.y < selection.c.y) {
+          aOffset = this.offsetVectorByNumber(selection.a, this.OFFSET_VALUE / 2);
+          cOffset = this.offsetVectorByNumber(selection.c, -this.OFFSET_VALUE / 2);
+        } else {
+          aOffset = this.offsetVectorByNumber(selection.a, -this.OFFSET_VALUE / 2);
+          cOffset = this.offsetVectorByNumber(selection.c, this.OFFSET_VALUE / 2);
+        }
+        
+        if (foundPoints.length === 0, this.isWithin(mousePos, aOffset, cOffset)) {
+          foundPoints.push(SelectionPoint.a, SelectionPoint.c);
+          this.editorCanvas.style.cursor = "move";
+        }
 
-      if (foundPoints.length > 0) {
-        foundSelection = selection;
-        break;
+        if (foundPoints.length > 0) {
+          foundSelection = selection;
+          break;
+        }
       }
     }
 
@@ -151,13 +189,16 @@ export default class EditorCanvas extends Vue {
     const elapsed = timestamp - this.startTimestamp;
     
     // Redraw canvas
-    if (this.editorContext && this.editorCanvas) {
+    if (this.editorContext && this.editorCanvas && this.selectedImage) {
       this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
       if (this.newSelection) {
         this.drawRectangle(this.newSelection);
       }
-      for (const selection of this.selections) {
-        this.drawRectangle(selection);
+      
+      for (const tag of this.selectedImage.tags) {
+        for (const selection of tag.selections) {
+          this.drawRectangle(selection);
+        }
       }
     }
 
