@@ -246,12 +246,11 @@ export default class EditorCanvas extends Vue {
     // this.editorCanvas.parentElement.clientWidth;
   }
 
+  /**
+   * Handles drawing the canvasImage in the center of the canvas
+   */
   drawImage(): void {
     if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-    // todo - scale images, center, etc...
-    // todo - to center calculate offset to use on top and left. device height of canvas, height of selected image.
 
     this.imageOffsetValue.x = (this.editorCanvas.width / 2) - (this.canvasImage.width / 2);
     this.imageOffsetValue.y = (this.editorCanvas.height / 2) - (this.canvasImage.height / 2);

@@ -1,18 +1,51 @@
 #image-upload {
-  display: inline-block;
-  border: 2px dashed #ccc;
+  height: 100px;
+  padding: 10px;
+}
+
+#image-upload-inner {
+  height: 100%;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid #fff;
+  background-color: rgba(255,255,255, 0.1);
   border-radius: 10px;
-  padding: 20px;
 
   &.highlight {
-    border-color: #333;
+    border-color: $brand-primary;
+    background-color: rgba($brand-primary, 0.1);
   }
 }
 
-#upload-input {
-  
+#upload-form {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 #upload-label {
+  font-family: Arial, Helvetica, sans-serif; // todo - remove when actual font is set.
+  background-color: $brand-primary;
+  color: #fff;
+  padding: 10px;
+  border-radius: 3px;
 
+  cursor: pointer;
+}
+
+#upload-input {
+  // Original input button hidden, hidden like this for accessibility
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+#secondary-text {
+  padding-left: 20px;
+  font-family: Arial, Helvetica, sans-serif; // todo - remove when actual font is set.
+  color: #fff;
 }

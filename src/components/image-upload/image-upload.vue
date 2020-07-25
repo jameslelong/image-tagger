@@ -1,10 +1,14 @@
 <template>
-    <section
-        id="image-upload" ref="image-upload" v-bind:class="{ highlight: isHighlighted }"
-        @dragover.prevent @dragover="setHighlight(true)" @dragleave="setHighlight(false)" @drop="onDrop">
-        <form>
-            <input id="upload-input" type="file" multiple accept="image/*" @change="onChange">
-        </form>
+    <section id="image-upload">
+        <div
+            id="image-upload-inner" ref="image-upload" v-bind:class="{ highlight: isHighlighted }"
+            @dragover.prevent @dragover="setHighlight(true)" @dragleave="setHighlight(false)" @drop="onDrop"> 
+            <form id="upload-form">
+                <label id="upload-label" for="upload-input">Upload Images</label>
+                <input id="upload-input" type="file" multiple accept="image/*" @change="onChange">
+            </form>
+            <p id="secondary-text">Or drag images here</p>
+        </div>
     </section>
 </template>
 
