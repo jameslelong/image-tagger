@@ -7,19 +7,19 @@ import Vector2 from "types/vector2";
 @Component
 export default class EditorCanvas extends Vue {
   @Prop(EditorImage) readonly selectedImage?: EditorImage;
+  public editorCanvas?: HTMLCanvasElement;
+  public editorContext?: CanvasRenderingContext2D;
   public canvasImage?: HTMLImageElement;
 
   private readonly OFFSET_VALUE: number = 10;
   
-  public editorCanvas?: HTMLCanvasElement;
-  public editorContext?: CanvasRenderingContext2D;
-
   public startTimestamp?: number;
   public newSelection?: Selection;
   public activeSelection?: Selection;
   public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
 
   private previousMousePos?: Vector2;
+  private imageOffsetValue = new Vector2(0,0);
 
   mounted(): void {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
@@ -45,17 +45,10 @@ export default class EditorCanvas extends Vue {
     this.canvasImage.src = image.encodedImage;
   }
 
-  isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
-    const withinX = (a.x < b.x && a.x > c.x) || (a.x > b.x && a.x < c.x);
-    const withinY = (a.y < b.y && a.y > c.y) || (a.y > b.y && a.y < c.y);
-
-    return withinX && withinY;
-  }
-
-  beginSelection(e: MouseEvent): void {
+  mouseDown(e: MouseEvent): void {
     if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage) return;
     
-    const mousePos: Vector2 = this.getMousePos(this.editorCanvas, e);
+    const mousePos: Vector2 = this.getRelativeMousePos(this.editorCanvas, e);
     const selectionCheck = this.checkSelectionAnchors(mousePos);
 
     if (selectionCheck) {
@@ -73,7 +66,7 @@ export default class EditorCanvas extends Vue {
   mouseMove(e: MouseEvent): void {
     if (!this.editorContext|| !this.editorCanvas) return;
 
-    const mousePos = this.getMousePos(this.editorCanvas, e);
+    const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
 
     if (!this.activeSelection) {
       this.checkSelectionAnchors(mousePos);
@@ -94,8 +87,8 @@ export default class EditorCanvas extends Vue {
     }
   }
 
-  endSelection(e: MouseEvent): void {
-    if (!this.activeSelection || !this.selectedImage) return;
+  mouseUp(e: MouseEvent): void {
+    if (!this.activeSelection) return;
 
     if (this.newSelection) {
       this.createNewSelection(this.newSelection);
@@ -182,6 +175,37 @@ export default class EditorCanvas extends Vue {
       this.editorCanvas.style.cursor = "default";
     }
   }
+  
+  isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
+    const isWithinX = (a.x < b.x && a.x > c.x) || (a.x > b.x && a.x < c.x);
+    const isWithinY = (a.y < b.y && a.y > c.y) || (a.y > b.y && a.y < c.y);
+
+    return isWithinX && isWithinY;
+  }
+
+  offsetVectorByNumber(pos: Vector2, offset: number): Vector2 {
+    return new Vector2(pos.x + offset, pos.y + offset);
+  }
+
+  offsetVectorByVector(pos: Vector2, offset: Vector2): Vector2 {
+    return new Vector2(pos.x + offset.x, pos.y + offset.y);
+  }
+
+
+  /**
+   * Returns Mouse Position Vector2 relative to the canvasImage's top left point position.
+   * @param canvas
+   * @param e 
+   */
+  getRelativeMousePos(canvas: HTMLCanvasElement, e: MouseEvent): Vector2 {
+    // https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas - relative mouse position
+
+    const rect = canvas.getBoundingClientRect();
+    const mousePosX = (e.clientX - rect.left) - this.imageOffsetValue.x;
+    const mousePosY = (e.clientY - rect.top) - this.imageOffsetValue.y;
+  
+    return new Vector2(mousePosX, mousePosY);
+  }
 
   animationStep(timestamp: number): void {
     if (this.startTimestamp === undefined) {
@@ -229,44 +253,28 @@ export default class EditorCanvas extends Vue {
     // todo - scale images, center, etc...
     // todo - to center calculate offset to use on top and left. device height of canvas, height of selected image.
 
-    const offsetX = (this.editorCanvas.width / 2) - (this.canvasImage.width / 2);
-    const offsetY = (this.editorCanvas.height / 2) - (this.canvasImage.height / 2);
+    this.imageOffsetValue.x = (this.editorCanvas.width / 2) - (this.canvasImage.width / 2);
+    this.imageOffsetValue.y = (this.editorCanvas.height / 2) - (this.canvasImage.height / 2);
 
-    this.editorContext.drawImage(this.canvasImage, offsetX, offsetY);
+    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y);
   }
 
   drawRectangle(selection: Selection): void {
     if (!this.editorContext || !this.editorCanvas) return;
 
+    const relativeA = this.offsetVectorByVector(selection.a, this.imageOffsetValue);
+    const relativeB = this.offsetVectorByVector(selection.b, this.imageOffsetValue);
+    const relativeC = this.offsetVectorByVector(selection.c, this.imageOffsetValue);
+    const relativeD = this.offsetVectorByVector(selection.d, this.imageOffsetValue);
+
     // Animate/Draw Here
-    this.editorContext.beginPath();
-    this.editorContext.moveTo(selection.a.x, selection.a.y);
-    this.editorContext.moveTo(selection.b.x, selection.b.y);
-    this.editorContext.moveTo(selection.c.x, selection.c.y);
-    this.editorContext.moveTo(selection.d.x, selection.d.y);
-    this.editorContext.closePath();
+    // Stroke
+    this.editorContext.strokeRect(relativeA.x, relativeA.y, selection.relHeight, selection.relWidth);
 
-    this.editorContext.strokeRect(selection.a.x, selection.a.y, selection.relHeight, selection.relWidth);
-
-    // draw points, a,b,c,d - todo - proper debugger mode
-    this.editorContext.fillRect(selection.a.x - 3, selection.a.y - 3, 6, 6);
-    this.editorContext.fillRect(selection.b.x - 3, selection.b.y - 3, 6, 6);
-    this.editorContext.fillRect(selection.c.x - 3, selection.c.y - 3, 6, 6);
-    this.editorContext.fillRect(selection.d.x - 3, selection.d.y - 3, 6, 6);
-
-    this.editorContext.fillText('a', selection.a.x - 8, selection.a.y - 3);
-    this.editorContext.fillText('b', selection.b.x - 8, selection.b.y - 3);
-    this.editorContext.fillText('c', selection.c.x - 8, selection.c.y - 3);
-    this.editorContext.fillText('d', selection.d.x - 8, selection.d.y - 3);
-  }
-
-  offsetVectorByNumber(pos: Vector2, offset: number): Vector2 {
-    return new Vector2(pos.x + offset, pos.y + offset);
-  }
-
-  getMousePos(canvas: HTMLCanvasElement, e: MouseEvent): Vector2 {
-    // https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas - relative mouse position
-    const rect = canvas.getBoundingClientRect();
-    return new Vector2(e.clientX - rect.left, e.clientY - rect.top);
+    // Anchors
+    this.editorContext.fillRect(relativeA.x - 3, relativeA.y - 3, 6, 6);
+    this.editorContext.fillRect(relativeB.x - 3, relativeB.y - 3, 6, 6);
+    this.editorContext.fillRect(relativeC.x - 3, relativeC.y - 3, 6, 6);
+    this.editorContext.fillRect(relativeD.x - 3, relativeD.y - 3, 6, 6);
   }
 }
