@@ -31,6 +31,10 @@ export default class EditorCanvas extends Vue {
 
     // Begin Animation
     window.requestAnimationFrame(this.animationStep);
+    
+    // Resize Event
+    this.resizeCanvas();
+    window.addEventListener("resize", this.resizeCanvas);
   }
 
   @Watch('selectedImage')
@@ -185,8 +189,8 @@ export default class EditorCanvas extends Vue {
     }
     const elapsed = timestamp - this.startTimestamp;
     
-    // Redraw canvas
-    if (this.editorContext && this.editorCanvas && this.selectedImage) {
+    // Draw canvas
+    if (this.editorCanvas && this.editorContext && this.selectedImage) {
 
       // Clear Canvas
       this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
@@ -210,12 +214,25 @@ export default class EditorCanvas extends Vue {
     window.requestAnimationFrame(this.animationStep);
   }
 
+  resizeCanvas(): void {
+    if (!this.editorCanvas?.parentElement || !this.editorContext) return;
+
+    this.editorCanvas.height = this.editorCanvas.parentElement.clientHeight;
+    this.editorCanvas.width = this.editorCanvas.parentElement.clientWidth;
+    // this.editorCanvas.parentElement.clientWidth;
+  }
+
   drawImage(): void {
-    if (!this.editorContext || !this.canvasImage) return;
+    if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
 
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     // todo - scale images, center, etc...
-    this.editorContext.drawImage(this.canvasImage, 0, 0);
+    // todo - to center calculate offset to use on top and left. device height of canvas, height of selected image.
+
+    const offsetX = (this.editorCanvas.width / 2) - (this.canvasImage.width / 2);
+    const offsetY = (this.editorCanvas.height / 2) - (this.canvasImage.height / 2);
+
+    this.editorContext.drawImage(this.canvasImage, offsetX, offsetY);
   }
 
   drawRectangle(selection: Selection): void {

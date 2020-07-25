@@ -1,8 +1,9 @@
 <template>
-  <canvas
-    id="editor-canvas" ref="editor-canvas"
-    @mousedown="beginSelection" @mouseup="endSelection" @mousemove="mouseMove">
-  </canvas>
+
+  <section id="editor-canvas">
+    <canvas ref="editor-canvas" @mousedown="beginSelection" @mouseup="endSelection" @mousemove="mouseMove">
+    </canvas>
+  </section>
 </template>
 
 <script src="./editor-canvas.ts"></script>

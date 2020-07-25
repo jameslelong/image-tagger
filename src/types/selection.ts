@@ -1,10 +1,10 @@
 import Vector2 from "types/vector2";
 
 export enum SelectionPoint {
-  a = 0,
-  b = 1,
-  c = 2,
-  d = 3
+  a,
+  b,
+  c,
+  d
 }
 
 export class Selection {
