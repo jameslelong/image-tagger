@@ -16,8 +16,8 @@
   border-radius: 10px;
 
   &.highlight {
-    border-color: $brand-primary;
-    background-color: rgba($brand-primary, 0.1);
+    border-color: $brand-blue;
+    background-color: rgba($brand-blue, 0.1);
   }
 }
 
@@ -28,11 +28,10 @@
 }
 
 #upload-label {
-  font-family: Arial, Helvetica, sans-serif; // todo - remove when actual font is set.
-  background-color: $brand-primary;
+  background-color: $brand-blue;
   color: #fff;
   padding: 10px;
-  border-radius: 3px;
+  border-radius: 5px;
 
   cursor: pointer;
 }
@@ -46,6 +45,5 @@
 
 #secondary-text {
   padding-left: 20px;
-  font-family: Arial, Helvetica, sans-serif; // todo - remove when actual font is set.
   color: #fff;
 }

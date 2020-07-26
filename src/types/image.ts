@@ -8,6 +8,7 @@ export class EditorImageTag {
     this.name = name;
   }
 }
+
 export class EditorImage {
   public readonly id: number;
   public readonly encodedImage: string;

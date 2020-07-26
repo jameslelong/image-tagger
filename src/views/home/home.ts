@@ -1,26 +1,30 @@
 import { Component, Vue } from "vue-property-decorator";
 
 import Carousel from "components/carousel/carousel.vue";
+import SettingsColumn from "components/settings-column/settings-column.vue";
 import EditorCanvas from "components/editor-canvas/editor-canvas.vue";
 import ImageUpload from "components/image-upload/image-upload.vue";
 
 import { EditorImage } from "types/image";
+import { Tag } from "types/tag";
 
 @Component({
   components: {
     Carousel,
+    SettingsColumn,
     EditorCanvas,
     ImageUpload
   }
 })
 export default class Home extends Vue {
   public readonly images = new Array<EditorImage>();
-  public selectedImage: EditorImage = new EditorImage('', 0); // todo - allow for nullable objects to be used as props? Otherwise I have to do this :(
+  public selectedImage: EditorImage = new EditorImage('', 0);
+  public tags: Array<Tag> = new Array<Tag>();
 
-  private imageId = 0; // todo - this is just a temporary way to give an id to an image, it works but perhaps find a more graceful solution
+  private imageUID = 0;
 
   createImage(encodedImage: string) {
-    const newImage = new EditorImage(encodedImage, this.imageId++);
+    const newImage = new EditorImage(encodedImage, this.imageUID++);
     this.images.push(newImage);
   
     // replace the placeholder featured image with new image
