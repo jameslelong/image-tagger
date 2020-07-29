@@ -127,7 +127,7 @@ export default class EditorCanvas extends Vue {
           const currPoint = selection.genericPointGet(i);
           const nextPoint = selection.genericPointGet((i + 1) % 4);
 
-          // Check Point
+          // Check mouse is withing point
           if (this.isWithin(mousePos, this.offsetVectorByNumber(currPoint, -this.OFFSET_VALUE), this.offsetVectorByNumber(currPoint, this.OFFSET_VALUE))) {
             foundPoints.push(i);
 
@@ -137,6 +137,9 @@ export default class EditorCanvas extends Vue {
             } else {
               this.editorCanvas.style.cursor = currPoint.x === nextPoint.x ? "nwse-resize" : "nesw-resize";
             }
+
+            // Break out of loop if point is found.
+            break;
           }
         }
 
