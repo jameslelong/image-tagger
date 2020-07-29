@@ -16,7 +16,9 @@
                         <span class="tag-id">{{ tag.id }}</span>
                         <span class="tag-name">{{ tag.name }}</span>
                     </div>
-                    <button class="tag-delete" v-on:click="deleteTag(tag.id)">X</button>
+                    <!-- todo - Redo Styles -->
+                    <button class="tag-select" v-on:click="selectTag(tag)">+</button>
+                    <button class="tag-delete" v-on:click="deleteTag(tag)">X</button>
                 </li>
             </ul>
         </div>    

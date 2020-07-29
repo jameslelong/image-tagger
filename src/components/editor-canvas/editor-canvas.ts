@@ -1,18 +1,20 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
-import { EditorImage, EditorImageTag } from "types/image";
-
+import { EditorImage, SelectionGroup } from "types/image";
 import { Selection, SelectionPoint } from "types/selection";
+import { Tag } from 'types/tag';
 import Vector2 from "types/vector2";
 
 @Component
 export default class EditorCanvas extends Vue {
   @Prop(EditorImage) readonly selectedImage?: EditorImage;
+  @Prop(Tag) readonly selectedTag?: Tag;
+
+  private readonly OFFSET_VALUE: number = 10;
+
   public editorCanvas?: HTMLCanvasElement;
   public editorContext?: CanvasRenderingContext2D;
   public canvasImage?: HTMLImageElement;
 
-  private readonly OFFSET_VALUE: number = 10;
-  
   public startTimestamp?: number;
   public newSelection?: Selection;
   public activeSelection?: Selection;
@@ -24,10 +26,6 @@ export default class EditorCanvas extends Vue {
   mounted(): void {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
     this.editorContext = this.editorCanvas.getContext("2d") as CanvasRenderingContext2D;
-
-    // todo - needs to scale dynamically
-    this.editorCanvas.height = 500;
-    this.editorCanvas.width = 500;
 
     // Begin Animation
     window.requestAnimationFrame(this.animationStep);
@@ -46,7 +44,8 @@ export default class EditorCanvas extends Vue {
   }
 
   mouseDown(e: MouseEvent): void {
-    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage) return;
+    // Todo - this is getting a bit overboard, all these checks are going to become too much
+    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage || !this.selectedTag || this.selectedTag.name === "") return;
     
     const mousePos: Vector2 = this.getRelativeMousePos(this.editorCanvas, e);
     const selectionCheck = this.checkSelectionAnchors(mousePos);
@@ -103,21 +102,17 @@ export default class EditorCanvas extends Vue {
    * @param selection
    */
   createNewSelection(selection: Selection) {
-    if (!this.selectedImage) return;
+    if (!this.selectedImage || !this.selectedTag) return;
 
-    // todo - prompt for user to select tag from existing tag list before firing this function?
-    // todo - should I just pass a ref to the tag itself? Instead of searching for it?
-    const devTagName = "tag-name";
-    let foundTag = this.selectedImage.tags.find(tag => tag.name === devTagName);
+    let selectionBasedTag = this.selectedImage.selectionGroup.find(group => group.linkedTag.id === this.selectedTag?.id); // todo - why do I have to do the conditonal check here on the selectedTag?
 
-    if (!foundTag) {
-      // Create Tag
-      const newTag = new EditorImageTag(devTagName);
-      const tagIndex = this.selectedImage.tags.push(newTag);
-      foundTag = this.selectedImage.tags[tagIndex - 1];
+    if (!selectionBasedTag) {
+      const newSelectionTag = new SelectionGroup(this.selectedTag);
+      const tagIndex = this.selectedImage.selectionGroup.push(newSelectionTag);
+      selectionBasedTag = this.selectedImage.selectionGroup[tagIndex - 1];
     }
 
-    foundTag.selections.push(selection);
+    selectionBasedTag.selections.push(selection);
   }
   
   checkSelectionAnchors(mousePos: Vector2): { foundPoints: Array<SelectionPoint>, foundSelection: Selection } | void {
@@ -126,7 +121,7 @@ export default class EditorCanvas extends Vue {
     const foundPoints = new Array<SelectionPoint>();
     let foundSelection: Selection | undefined;
 
-    for (const tag of this.selectedImage.tags) {
+    for (const tag of this.selectedImage.selectionGroup) {
       for (const selection of tag.selections) {
         for (let i = 0, j = 3; i <= j; i++) {
           const currPoint = selection.genericPointGet(i);
@@ -172,7 +167,7 @@ export default class EditorCanvas extends Vue {
     if (foundPoints.length > 0 && foundSelection) {
       return { foundPoints: foundPoints, foundSelection: foundSelection };
     } else {
-      this.editorCanvas.style.cursor = "default";
+      this.editorCanvas.style.cursor = "crosshair";
     }
   }
   
@@ -214,7 +209,7 @@ export default class EditorCanvas extends Vue {
     const elapsed = timestamp - this.startTimestamp;
     
     // Draw canvas
-    if (this.editorCanvas && this.editorContext && this.selectedImage) {
+    if (this.editorCanvas && this.editorContext && this.selectedImage && this.selectedTag) {
 
       // Clear Canvas
       this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
@@ -224,13 +219,13 @@ export default class EditorCanvas extends Vue {
 
       // Draw new selection rectangle
       if (this.newSelection) {
-        this.drawRectangle(this.newSelection);
+        this.drawRectangle(this.newSelection, this.selectedTag.name);
       }
       
       // Draw selected image's selection rectangles
-      for (const tag of this.selectedImage.tags) {
-        for (const selection of tag.selections) {
-          this.drawRectangle(selection);
+      for (const group of this.selectedImage.selectionGroup) {
+        for (const selection of group.selections) {
+          this.drawRectangle(selection, group.linkedTag.name);
         }
       }
     }
@@ -258,7 +253,7 @@ export default class EditorCanvas extends Vue {
     this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y);
   }
 
-  drawRectangle(selection: Selection): void {
+  drawRectangle(selection: Selection, groupName: string): void {
     if (!this.editorContext || !this.editorCanvas) return;
 
     const relativeA = this.offsetVectorByVector(selection.a, this.imageOffsetValue);
@@ -268,12 +263,18 @@ export default class EditorCanvas extends Vue {
 
     // Animate/Draw Here
     // Stroke
+    this.editorContext.strokeStyle = "#FF0000";
     this.editorContext.strokeRect(relativeA.x, relativeA.y, selection.relHeight, selection.relWidth);
 
     // Anchors
+    this.editorContext.fillStyle = "#FF0000";
     this.editorContext.fillRect(relativeA.x - 3, relativeA.y - 3, 6, 6);
     this.editorContext.fillRect(relativeB.x - 3, relativeB.y - 3, 6, 6);
     this.editorContext.fillRect(relativeC.x - 3, relativeC.y - 3, 6, 6);
     this.editorContext.fillRect(relativeD.x - 3, relativeD.y - 3, 6, 6);
+
+    // Text
+    this.editorContext.font = "20px roboto";
+    this.editorContext.fillText(groupName, relativeA.x + 5, relativeA.y + 20);
   }
 }

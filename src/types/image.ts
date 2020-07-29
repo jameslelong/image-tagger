@@ -1,20 +1,21 @@
 import { Selection } from "types/selection";
+import { Tag } from './tag';
 
-export class EditorImageTag {
-  public selections: Array<Selection> = new Array<Selection>();
-  public name: string;
+export class SelectionGroup {
+  public readonly linkedTag: Tag;
+  public selections = new Array<Selection>();
 
-  constructor(name: string) {
-    this.name = name;
+  constructor(tag: Tag) {
+    this.linkedTag = tag;
   }
 }
 
 export class EditorImage {
   public readonly id: number;
   public readonly encodedImage: string;
-  public readonly tags = new Array<EditorImageTag>();
+  public readonly selectionGroup = new Array<SelectionGroup>();
   
-  constructor(encodedImage: string, id: number) {
+  constructor(id: number, encodedImage: string) {
     this.id = id;
     this.encodedImage = encodedImage;
   }

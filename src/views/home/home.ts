@@ -17,20 +17,26 @@ import { Tag } from "types/tag";
   }
 })
 export default class Home extends Vue {
+  // todo - start here, assign selection to selected tag
   public readonly images = new Array<EditorImage>();
-  public selectedImage: EditorImage = new EditorImage('', 0);
+  public selectedImage: EditorImage = new EditorImage(0, '');
+  public selectedTag: Tag = new Tag(0, '');
   public tags: Array<Tag> = new Array<Tag>();
 
   private imageUID = 0;
 
   createImage(encodedImage: string) {
-    const newImage = new EditorImage(encodedImage, this.imageUID++);
+    const newImage = new EditorImage(this.imageUID++, encodedImage);
     this.images.push(newImage);
   
     // replace the placeholder featured image with new image
     if (this.selectedImage.encodedImage === "") {
       this.selectImage(newImage);
     }
+  }
+
+  selectTag(tag: Tag) {
+    this.selectedTag = tag;
   }
 
   selectImage(image: EditorImage) {

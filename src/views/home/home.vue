@@ -3,10 +3,10 @@
     <carousel v-bind:images="images" v-bind:selectedImage="selectedImage" v-on:image-selected="selectImage"></carousel>
     <div id="primary-area">
       <div id="editor-column">
-        <editor-canvas v-bind:selectedImage="selectedImage"></editor-canvas>
+        <editor-canvas v-bind:selectedImage="selectedImage" v-bind:selectedTag="selectedTag"></editor-canvas>
         <image-upload v-on:image-uploaded="createImage"></image-upload>
       </div>
-      <settings-column v-bind:tags="tags"></settings-column>
+      <settings-column v-bind:tags="tags" v-on:tag-selected="selectTag"></settings-column>
     </div>
   </section>
 </template>
