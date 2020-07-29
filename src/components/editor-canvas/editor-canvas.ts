@@ -104,7 +104,7 @@ export default class EditorCanvas extends Vue {
   createNewSelection(selection: Selection) {
     if (!this.selectedImage || !this.selectedTag) return;
 
-    let selectionBasedTag = this.selectedImage.selectionGroup.find(group => group.linkedTag.id === this.selectedTag?.id); // todo - why do I have to do the conditonal check here on the selectedTag?
+    let selectionBasedTag = this.selectedImage.selectionGroup.find(group => group.linkedTag.id === this.selectedTag?.id);
 
     if (!selectionBasedTag) {
       const newSelectionTag = new SelectionGroup(this.selectedTag);
@@ -186,7 +186,6 @@ export default class EditorCanvas extends Vue {
     return new Vector2(pos.x + offset.x, pos.y + offset.y);
   }
 
-
   /**
    * Returns Mouse Position Vector2 relative to the canvasImage's top left point position.
    * @param canvas
@@ -238,7 +237,6 @@ export default class EditorCanvas extends Vue {
 
     this.editorCanvas.height = this.editorCanvas.parentElement.clientHeight;
     this.editorCanvas.width = this.editorCanvas.parentElement.clientWidth;
-    // this.editorCanvas.parentElement.clientWidth;
   }
 
   /**
@@ -274,7 +272,10 @@ export default class EditorCanvas extends Vue {
     this.editorContext.fillRect(relativeD.x - 3, relativeD.y - 3, 6, 6);
 
     // Text
-    this.editorContext.font = "20px roboto";
-    this.editorContext.fillText(groupName, relativeA.x + 5, relativeA.y + 20);
+    const topLeft = selection.findTopLeft();
+    const relativeTopLeft = this.offsetVectorByVector(topLeft, this.imageOffsetValue);
+
+    this.editorContext.font = "16px roboto";
+    this.editorContext.fillText(groupName, relativeTopLeft.x + 5, relativeTopLeft.y + 19);
   }
 }

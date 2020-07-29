@@ -77,6 +77,12 @@ export class Selection {
     this._a = this._b = this._c = this._d = pos;
   }
 
+  public findTopLeft(): Vector2 {
+    const arr = [this.a, this.b, this.c, this.d];
+    arr.sort((a: Vector2, b: Vector2) => a.x + a.y < b.x + b.y ? -1 : 1);
+    return arr[0];
+  }
+
   public genericPointGet(sp: SelectionPoint): Vector2 {
     switch (sp as SelectionPoint) {
     case SelectionPoint.a:
