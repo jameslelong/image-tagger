@@ -12,22 +12,27 @@ export default class ImageUpload extends Vue {
 
   private tagUID = 0;
   public tagNameInput = "";
-  public activeBranch = -1;
+  public activeBranches = new Array<number>();
 
-  createTag() {
+  createTag(): void {
     if (!this.tagNameInput || !this.tags) return;
 
-    const tag = new Tag(this.tagUID++, this.tagNameInput);
-    this.tags.push(tag);
+    // check that tag doesn't already exist
+    if (this.tags.find(tag => this.tagNameInput.toLowerCase() === tag.name.toLowerCase())) {
+      // todo - show little tooltip.
+    } else {
+      const tag = new Tag(this.tagUID++, this.tagNameInput);
+      this.tags.push(tag);
+    }
 
     this.tagNameInput = "";
   }
 
-  selectTag(tagToSelect: Tag) {
+  selectTag(tagToSelect: Tag): void {
     this.$emit('tag-selected', tagToSelect);
   }
 
-  deleteTag(tagToDelete: Tag) {
+  deleteTag(tagToDelete: Tag): void {
     if (!this.tags) return;
 
     // todo - also need to delete linked tags.
@@ -36,9 +41,20 @@ export default class ImageUpload extends Vue {
     this.tags.splice(deleteIndex, 1);
   }
 
-  toggleBranch(index: number) {
-    this.activeBranch = this.activeBranch !== index ? index : -1 ;
-    console.log(this.activeBranch);
+  toggleBranch(index: number): void {
+    // this.activeBranch = this.activeBranch !== index ? index : -1 ;
+    // console.log(this.activeBranch);
+    const found = this.activeBranches.includes(index);
+
+    if (found) {
+      this.activeBranches.splice(index, 1);
+    } else {
+      this.activeBranches.push(index);
+    }
+  }
+
+  isBranchEnabled(index: number): boolean {
+    return this.activeBranches.includes(index);
   }
 
   selectionsOfTag(tag: Tag): Array<Selection> | undefined {
