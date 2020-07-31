@@ -1,6 +1,5 @@
 #settings-column {
     width: 250px;
-    padding: 20px;
 
     background-color: $brand-dark;
     border-left: 1px solid $brand-light;
@@ -10,8 +9,7 @@
 
 // Momento
 #momento-container {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
     border-bottom: 1px solid $brand-light;
 }
 
@@ -32,100 +30,156 @@
     }
 }
 
-// Tags
-#tag-container {
-    
-}
-
+// Tag Create
 #tag-create-form {
     display: flex;
-    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 2px solid $brand-darkest;
+
+    &:focus-within {
+        box-shadow: 0 0 0 3px rgba($brand-blue, 0.2);
+    }
 
     input {
-        width: calc(100% - 50px);
-        margin-right: 10px;
-        border-radius: 5px;
+        width: calc(100% - 40px);
+        background: none;
+        border: none;
         padding: 5px 10px;
-
         color: #fff;
-        background-color: $brand-dark;
-        border: 2px solid #fff;
     }
 
     button {
-        height: 40px;
-        width: 40px;
-        border-radius: 5px;
+        margin: 5px;
+        width: 30px;
+        height: 30px;
+        background: none;
         border: none;
         padding: 0;
-
         color: #fff;
-        background-color: $brand-green;
-
-        cursor: pointer;
+        border-radius: 15px;
+        &:hover {
+            cursor: pointer;
+            background-color: $brand-blue;
+        }
     }
 }
 
-#tag-list {
+// Tree View
+.tree-list {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-.tag-list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.tree-delete {
+    margin: 5px;
+    height: 30px;
+    width: 30px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    border-radius: 15px;
 
-    text-decoration: none;
-    height: 40px;
-    width: 100%;
-
-    background-color: $brand-darker;
-    border-radius: 5px;
-
-    &:not(:last-of-type) {
-        margin-bottom: 10px;
-    }
-
-    .tag-meta {
-        display: flex;
-        align-items: center;
-
-        padding: 10px;
-        .tag-id {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 12px;
-            font-weight: 600;
-            
-            height: 16px;
-            width: 16px;
-            border-radius: 2px;
-
-            margin-right: 10px;
-
-            background-color: $brand-blue;
-        }   
-        .tag-name {
-            font-size: 15px;
-        }
-    }
-
-    .tag-delete {
-        height: 34px;
-        width: 34px;
-        margin-right: 3px;
-        border-radius: 4px;
-
-        border: none;
-        padding: 0;
+    &:hover {
+        background-color: $brand-red;
         color: #fff;
-        background-color: $brand-darkest;
-
-        cursor: pointer;
     }
 }
 
+// Tags
+#tag-list {
+    .tree-delete {
+        display: none;
+    }
+    &:hover {
+        .tree-delete {
+            display: block;
+        }
+    }
+}
+
+#tag-header {
+    padding: 20px;
+    h2 {
+        margin: 0 0 20px 0;
+    }    
+}
+
+.tag-meta {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.tag-name {
+    font-size: 14px;
+}
+
+.tag-id {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 10px;
+    font-size: 12px;
+    background-color: $brand-blue;
+    font-weight: 600;
+    border-radius: 2px;
+    height: 18px;
+    width: 18px;
+}
+
+.tag-list-item-inner {
+    display: flex;
+    justify-content: space-around;
+    height: 40px;
+    border: 1px solid $brand-dark;
+
+    &.selected {
+        background-color: $brand-darkest;
+        border-color: $brand-darkest;
+    }
+
+    &:hover {
+        border-color: $brand-darkest;
+    }
+}
+
+.tag-dropdown-button {
+    width: 40px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #fff;
+    cursor: pointer;
+
+    &.active {
+        i {
+            transform: rotate(90deg);
+        }
+    }
+}
+
+// Selections
+.selection-list {
+    margin-left: 60px;
+    display: none;
+
+    &.active {
+        display: block;
+    }
+}
+
+.selection-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+}
+
+.selection-meta {
+    font-size: 14px;
+}

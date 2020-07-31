@@ -5,26 +5,46 @@
             <button class="momento-button">Redo</button>
         </div>
         <div id="tag-container">
-            <h2>Tags</h2>
-            <form id="tag-create-form" v-on:submit.prevent="createTag">
-                <input placeholder="Name" v-model="tagNameInput">
-                <button type="submit">+</button>
-            </form>
-            <ul id="tag-list">
-                <li class="tag-list-item" v-for="tag in tags" :key="tag.id">
-                    <div class="tag-meta">
-                        <span class="tag-id">{{ tag.id }}</span>
-                        <span class="tag-name">{{ tag.name }}</span>
+            <div id="tag-header">
+                <h2>Tags</h2>
+                <form id="tag-create-form" v-on:submit.prevent="createTag">
+                    <input placeholder="Tag Name" v-model="tagNameInput">
+                    <button type="submit">+</button>
+                </form>
+            </div>
+            <ul id="tag-list" class="tree-list">
+                <li class="tag-list-item" v-for="(tag, index) in tags" v-bind:key="tag.id">
+                    <!-- Tag Branch Controls -->
+                    <div class="tag-list-item-inner" v-bind:class="{ selected: selectedTag.id === tag.id }">
+                        <button class="tag-dropdown-button" v-on:click="toggleBranch(index)" v-bind:class="{ active: activeBranch === index }">
+                            <i class="fas fa-caret-right fa-xs"></i>
+                        </button>
+                        <div class="tag-meta" v-on:click="selectTag(tag)">
+                            <span class="tag-id">{{ tag.id }}</span>
+                            <span class="tag-name">{{ tag.name }}</span>
+                        </div>
+                        <button class="tree-delete" v-on:click="deleteTag(tag)">
+                            <i class="fas fa-times fa-xs"></i>
+                        </button>
                     </div>
-                    <!-- todo - Redo Styles -->
-                    <button class="tag-select" v-on:click="selectTag(tag)">+</button>
-                    <button class="tag-delete" v-on:click="deleteTag(tag)">X</button>
+                    <!-- Nest Selection List -->
+                    <ul class="selection-list tree-list" v-bind:class="{ active: activeBranch === index}">
+                        <li class="selection-list-item" v-for="selection of selectionsOfTag(tag)" v-bind:key="selection.id">
+                            <div class="tree-list-item-inner">
+                                <span class="selection-meta">
+                                    x: {{ selection.a.x }}, y: {{ selection.a.y }}
+                                </span>
+                            </div>
+                            <button class="tree-delete">
+                                <i class="fas fa-times fa-xs"></i>
+                            </button>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>    
     </section>
 </template>
-
 
 <script src="./settings-column.ts"></script>
 <style lang="scss">
