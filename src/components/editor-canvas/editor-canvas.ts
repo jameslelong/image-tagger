@@ -122,7 +122,7 @@ export default class EditorCanvas extends Vue {
     let foundSelection: Selection | undefined;
 
     for (const tag of this.selectedImage.selectionGroup) {
-      for (const selection of tag.selections) {
+      for (const selection of tag.selections) { // todo - this loop here is ary
         for (let i = 0, j = 3; i <= j; i++) {
           const currPoint = selection.genericPointGet(i);
           const nextPoint = selection.genericPointGet((i + 1) % 4);
@@ -164,6 +164,9 @@ export default class EditorCanvas extends Vue {
           foundSelection = selection;
           break;
         }
+      }
+      if (foundSelection) {
+        break;
       }
     }
 
