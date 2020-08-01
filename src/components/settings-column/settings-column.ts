@@ -8,6 +8,7 @@ import { Selection } from '@/types/selection';
 export default class ImageUpload extends Vue {
   @Prop(Array) readonly tags?: Array<Tag>;
   @Prop(Tag) readonly selectedTag?: Tag;
+  @Prop(Array) readonly images?: Array<EditorImage>;
   @Prop(EditorImage) readonly selectedImage?: EditorImage;
 
   private tagUID = 0;
@@ -33,12 +34,18 @@ export default class ImageUpload extends Vue {
   }
 
   deleteTag(tagToDelete: Tag): void {
-    if (!this.tags) return;
+    if (!this.tags || !this.images) return;
 
-    // todo - also need to delete linked tags from images.
+    // Remove tag from library
+    const tagDeleteIndex = this.tags.findIndex(tag => tag.id === tagToDelete.id);
+    this.tags.splice(tagDeleteIndex, 1);
 
-    const deleteIndex = this.tags?.findIndex(tag => tag.id === tagToDelete.id);
-    this.tags.splice(deleteIndex, 1);
+    // Remove selection group linked to tag from all images
+    this.images.forEach(image => {
+      const groupDeleteIndex = image.selectionGroup.findIndex(group => group.linkedTag.id === tagToDelete.id);
+      image.selectionGroup.splice(groupDeleteIndex, 1);
+    });
+
   }
 
   toggleBranch(tag: Tag): void {
