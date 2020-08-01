@@ -35,26 +35,24 @@ export default class ImageUpload extends Vue {
   deleteTag(tagToDelete: Tag): void {
     if (!this.tags) return;
 
-    // todo - also need to delete linked tags.
+    // todo - also need to delete linked tags from images.
 
     const deleteIndex = this.tags?.findIndex(tag => tag.id === tagToDelete.id);
     this.tags.splice(deleteIndex, 1);
   }
 
-  toggleBranch(index: number): void {
-    // this.activeBranch = this.activeBranch !== index ? index : -1 ;
-    // console.log(this.activeBranch);
-    const found = this.activeBranches.includes(index);
+  toggleBranch(tag: Tag): void {
+    const foundIndex = this.activeBranches.indexOf(tag.id);
 
-    if (found) {
-      this.activeBranches.splice(index, 1);
+    if (foundIndex >= 0) {
+      this.activeBranches.splice(foundIndex, 1);
     } else {
-      this.activeBranches.push(index);
+      this.activeBranches.push(tag.id);
     }
   }
 
-  isBranchEnabled(index: number): boolean {
-    return this.activeBranches.includes(index);
+  isBranchEnabled(tag: Tag): boolean {
+    return this.activeBranches.includes(tag.id);
   }
 
   selectionsOfTag(tag: Tag): Array<Selection> | undefined {

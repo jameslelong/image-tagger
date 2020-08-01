@@ -13,10 +13,10 @@
                 </form>
             </div>
             <ul id="tag-list" class="tree-list">
-                <li class="tag-list-item" v-for="(tag, index) in tags" v-bind:key="tag.id">
+                <li class="tag-list-item" v-for="tag in tags" v-bind:key="tag.id">
                     <!-- Tag Branch Controls -->
                     <div class="tag-list-item-inner" v-bind:class="{ selected: selectedTag.id === tag.id }">
-                        <button class="tag-dropdown-button" v-on:click="toggleBranch(index)" v-bind:class="{ active: isBranchEnabled(index)}">
+                        <button class="tag-dropdown-button" v-on:click="toggleBranch(tag)" v-bind:class="{ active: isBranchEnabled(tag)}">
                             <i class="fas fa-caret-right fa-xs"></i>
                         </button>
                         <div class="tag-meta" v-on:click="selectTag(tag)">
@@ -28,7 +28,7 @@
                         </button>
                     </div>
                     <!-- Nest Selection List -->
-                    <ul class="selection-list tree-list" v-bind:class="{ active: isBranchEnabled(index)}">
+                    <ul class="selection-list tree-list" v-bind:class="{ active: isBranchEnabled(tag)}">
                         <li class="selection-list-item" v-for="selection of selectionsOfTag(tag)" v-bind:key="selection.id">
                             <div class="tree-list-item-inner">
                                 <span class="selection-meta">
