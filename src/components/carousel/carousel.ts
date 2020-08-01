@@ -28,13 +28,14 @@ export default class Carousel extends Vue {
   }
 
   next(): void {
-    // todo - animate
     if (!this.carousel) return;
 
     const carouselParent = this.carousel.parentElement;
     if (carouselParent) {
-      // todo - this maths needs to be improved. Essentially checking that the inner carousel doesn't get offset into oblivion.
-      if (Math.abs(this.carouselOffset) < carouselParent.clientWidth) {
+      const carouselInnerWidth = this.carousel.clientWidth;
+      const carouselParentWidth = carouselParent.clientWidth;
+
+      if (carouselInnerWidth > carouselParentWidth && carouselParentWidth - carouselInnerWidth < this.carouselOffset) {
         this.carouselOffset -= this.imageWidth;
         this.carousel.style.left = `${this.carouselOffset}px`;  
       }
