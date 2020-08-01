@@ -35,7 +35,7 @@
                                     x: {{ selection.a.x }}, y: {{ selection.a.y }}
                                 </span>
                             </div>
-                            <button class="tree-delete">
+                            <button class="tree-delete" v-on:click="deleteSelection(tag, selection)">
                                 <i class="fas fa-times fa-xs"></i>
                             </button>
                         </li>

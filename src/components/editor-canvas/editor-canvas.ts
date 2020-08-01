@@ -10,6 +10,7 @@ export default class EditorCanvas extends Vue {
   @Prop(Tag) readonly selectedTag?: Tag;
 
   private readonly OFFSET_VALUE: number = 10;
+  private selectionUID = 0;
 
   public editorCanvas?: HTMLCanvasElement;
   public editorContext?: CanvasRenderingContext2D;
@@ -57,7 +58,7 @@ export default class EditorCanvas extends Vue {
 
     // Create New Selection
     if (this.activeSelection === undefined && this.activePoints.length === 0) {
-      this.activeSelection = this.newSelection = new Selection(mousePos);
+      this.activeSelection = this.newSelection = new Selection(this.selectionUID++, mousePos);
       this.activePoints.push(SelectionPoint.c);
     }
   }

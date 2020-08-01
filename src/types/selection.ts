@@ -8,6 +8,7 @@ export enum SelectionPoint {
 }
 
 export class Selection {
+  public id: number;
   private _a: Vector2;
   private _b: Vector2;
   private _c: Vector2;
@@ -73,7 +74,8 @@ export class Selection {
     return this.a.y > this.c.y ? -this.absWidth : this.absWidth;
   }
 
-  constructor(pos: Vector2) {
+  constructor(id: number, pos: Vector2) {
+    this.id = id;
     this._a = this._b = this._c = this._d = pos;
   }
 

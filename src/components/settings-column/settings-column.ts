@@ -52,6 +52,15 @@ export default class ImageUpload extends Vue {
     }
   }
 
+  deleteSelection(relatedTag: Tag, selectionToDelete: Selection) {
+    const relatedGroup = this.selectedImage?.selectionGroup.find(group => group.linkedTag.id === relatedTag.id);
+
+    if (relatedGroup) {
+      const selectionDeleteIndex = relatedGroup?.selections.findIndex(selection => selection.id === selectionToDelete.id);
+      relatedGroup?.selections.splice(selectionDeleteIndex, 1);
+    }
+  }
+
   toggleBranch(tag: Tag): void {
     const foundIndex = this.activeBranches.indexOf(tag.id);
 
