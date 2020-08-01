@@ -19,8 +19,8 @@ import { Tag } from "types/tag";
 export default class Home extends Vue {
   // todo - start here, assign selection to selected tag
   public readonly images = new Array<EditorImage>();
-  public selectedImage: EditorImage = new EditorImage(0, '');
-  public selectedTag: Tag = new Tag(0, '');
+  public selectedImage: EditorImage = new EditorImage(-1, '');
+  public selectedTag: Tag = new Tag(-1, '');
   public tags: Array<Tag> = new Array<Tag>();
 
   private imageUID = 0;

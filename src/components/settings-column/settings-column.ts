@@ -30,7 +30,7 @@ export default class ImageUpload extends Vue {
   }
 
   selectTag(tagToSelect: Tag): void {
-    this.$emit('tag-selected', tagToSelect);
+    this.$emit("tag-selected", tagToSelect);
   }
 
   deleteTag(tagToDelete: Tag): void {
@@ -46,6 +46,10 @@ export default class ImageUpload extends Vue {
       image.selectionGroup.splice(groupDeleteIndex, 1);
     });
 
+    // If selected tag is delete, delete it. Due to Vue Prop management, the tag needs to be replaced with a placeholder.
+    if (tagToDelete.id === this.selectedTag?.id) {
+      this.$emit("tag-selected", new Tag(-1, ""));
+    }
   }
 
   toggleBranch(tag: Tag): void {
