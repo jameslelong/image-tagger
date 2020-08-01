@@ -9,6 +9,8 @@ export enum SelectionPoint {
 
 export class Selection {
   public id: number;
+  public isHighlighted = false;
+ 
   private _a: Vector2;
   private _b: Vector2;
   private _c: Vector2;

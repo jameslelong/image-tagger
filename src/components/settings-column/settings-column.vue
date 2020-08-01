@@ -13,7 +13,7 @@
                 </form>
             </div>
             <ul id="tag-list" class="tree-list">
-                <li class="tag-list-item" v-for="tag in tags" v-bind:key="tag.id">
+                <li class="tag-list-item" v-for="tag in tags" v-bind:key="tag.id"> 
                     <!-- Tag Branch Controls -->
                     <div class="tag-list-item-inner" v-bind:class="{ selected: selectedTag.id === tag.id }">
                         <button class="tag-dropdown-button" v-on:click="toggleBranch(tag)" v-bind:class="{ active: isBranchEnabled(tag)}">
@@ -29,12 +29,10 @@
                     </div>
                     <!-- Nest Selection List -->
                     <ul class="selection-list tree-list" v-bind:class="{ active: isBranchEnabled(tag)}">
-                        <li class="selection-list-item" v-for="selection of selectionsOfTag(tag)" v-bind:key="selection.id">
-                            <div class="tree-list-item-inner">
-                                <span class="selection-meta">
-                                    x: {{ selection.a.x }}, y: {{ selection.a.y }}
-                                </span>
-                            </div>
+                        <li class="selection-list-item" v-for="selection of selectionsOfTag(tag)" v-bind:key="selection.id" v-on:mouseenter="highlightSelection(selection, true)" v-on:mouseleave="highlightSelection(selection, false)">
+                            <span class="selection-meta">
+                                x: {{ selection.a.x }}, y: {{ selection.a.y }}
+                            </span>
                             <button class="tree-delete" v-on:click="deleteSelection(tag, selection)">
                                 <i class="fas fa-times fa-xs"></i>
                             </button>

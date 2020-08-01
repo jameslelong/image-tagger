@@ -80,4 +80,12 @@ export default class ImageUpload extends Vue {
     const foundGroup = this.selectedImage?.selectionGroup.find(group => group.linkedTag.id === tag.id);
     return foundGroup?.selections;
   }
+
+  // highlightTag(): void {
+
+  // }
+
+  highlightSelection(selection: Selection, isHighlighted: boolean): void {
+    selection.isHighlighted = isHighlighted;
+  }
 }

@@ -1,6 +1,6 @@
 <template>
   <section id="editor-canvas">
-    <canvas ref="editor-canvas" @mousedown="mouseDown" @mouseup="mouseUp" @mousemove="mouseMove">
+    <canvas ref="editor-canvas" v-on:mousedown="mouseDown" v-on:mouseup="mouseUp" v-on:mousemove="mouseMove">
     </canvas>
   </section>
 </template>

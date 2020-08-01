@@ -266,13 +266,15 @@ export default class EditorCanvas extends Vue {
     const relativeC = this.offsetVectorByVector(selection.c, this.imageOffsetValue);
     const relativeD = this.offsetVectorByVector(selection.d, this.imageOffsetValue);
 
+    const colorHex = selection.isHighlighted ? "#0000FF" : "#FF0000"; 
+
     // Animate/Draw Here
     // Stroke
-    this.editorContext.strokeStyle = "#FF0000";
+    this.editorContext.strokeStyle = colorHex;
     this.editorContext.strokeRect(relativeA.x, relativeA.y, selection.relHeight, selection.relWidth);
 
     // Anchors
-    this.editorContext.fillStyle = "#FF0000";
+    this.editorContext.fillStyle = colorHex;
     this.editorContext.fillRect(relativeA.x - 3, relativeA.y - 3, 6, 6);
     this.editorContext.fillRect(relativeB.x - 3, relativeB.y - 3, 6, 6);
     this.editorContext.fillRect(relativeC.x - 3, relativeC.y - 3, 6, 6);
