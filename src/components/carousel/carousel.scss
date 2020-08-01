@@ -7,9 +7,14 @@
 
   background-color: $brand-dark;
   border-bottom: 1px solid $brand-light;
+
+  overflow: hidden;
 }
 
 .carousel-button-wrap {
+  position: relative;
+  z-index: 10;
+
   height: 100%;
   width: 80px;
 
@@ -18,23 +23,50 @@
   justify-content: center;
 }
 
+.carousel-left {
+  background: linear-gradient(to left, rgba($brand-dark,0) 10%, $brand-dark)
+}
+
+.carousel-right {
+  background: linear-gradient(to right, rgba($brand-dark,0) 10%, $brand-dark)
+}
+
 .carousel-button {
   height: 40px;
   width: 40px;
-
+  padding: 0;
+  
   background-color: $brand-blue;
   border-radius: 20px;
   border: none;
   color: #fff;
+
+  cursor: pointer;
+
+  &:hover {
+    background-color: $brand-blue-darker;
+  }
 }
 
 #carousel-main {
+  position: relative;
+
   height: 100%;
   width: calc(100% - 160px);
-  padding: 10px 0;
 
   display: flex;
   flex-direction: row;
+}
+
+#carousel-main-inner {
+  position: absolute;
+  left: 0;
+
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  padding: 10px 0;
+  // transform-style: preserve-3d;
 }
 
 .carousel-image-button {

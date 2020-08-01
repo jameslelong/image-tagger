@@ -9,7 +9,9 @@
                 <h2>Tags</h2>
                 <form id="tag-create-form" v-on:submit.prevent="createTag">
                     <input placeholder="Tag Name" v-model="tagNameInput">
-                    <button type="submit">+</button>
+                    <button type="submit">
+                        <i class="fas fa-plus fa-xs"></i>
+                    </button>
                 </form>
             </div>
             <ul id="tag-list" class="tree-list">
