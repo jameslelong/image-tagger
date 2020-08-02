@@ -1,12 +1,9 @@
 <template>
     <section id="settings-column">
-        <div id="momento-container">
-            <button class="momento-button">Undo</button>
-            <button class="momento-button">Redo</button>
-        </div>
+        <!-- Tags -->
         <div id="tag-container">
             <div id="tag-header">
-                <h2>Tags</h2>
+                <h2 class="settings-title">Tags</h2>
                 <form id="tag-create-form" v-on:submit.prevent="createTag">
                     <input placeholder="Tag Name" v-model="tagNameInput">
                     <button type="submit">
@@ -42,7 +39,15 @@
                     </ul>
                 </li>
             </ul>
-        </div>    
+        </div>
+
+        <!-- Export -->
+        <div id="export-container">
+            <button id="download-button" class="default-button">
+                <i class="fas fa-download fa-sm"></i>
+                <span>Download</span>
+            </button>
+        </div>
     </section>
 </template>
 

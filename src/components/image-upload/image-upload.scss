@@ -27,19 +27,6 @@
   flex-direction: column;
 }
 
-#upload-label {
-  background-color: $brand-blue;
-  color: #fff;
-  padding: 10px;
-  border-radius: 5px;
-
-  &:hover {
-    background-color: $brand-blue-darker;
-  }
-
-  cursor: pointer;
-}
-
 #upload-input {
   // Original input button hidden, hidden like this for accessibility
   opacity: 0;

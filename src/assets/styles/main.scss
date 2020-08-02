@@ -1,6 +1,20 @@
 @import "colour.scss";
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
+.default-button {
+    border: none;
+    background-color: $brand-blue;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+  
+    &:hover {
+      background-color: $brand-blue-darker;
+    }
+  
+    cursor: pointer;
+}  
+
 .tag-id {
     display: flex;
     align-items: center;

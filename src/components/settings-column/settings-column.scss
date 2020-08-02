@@ -1,33 +1,27 @@
 #settings-column {
     width: 250px;
 
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+
     background-color: $brand-dark;
     border-left: 1px solid $brand-light;
 
     color: #fff;
 }
 
-// Momento
-#momento-container {
-    padding: 20px;
-    border-bottom: 1px solid $brand-light;
+.settings-title {
+    margin: 0 0 20px 0;
 }
 
-.momento-button {
-    height: 40px;
-    width: calc(50% - 5px);
+// Tag Section
+#tag-container {
+    display: flex;
+    flex-direction: column;
 
-    background-color: $brand-darkest;
-    padding: 0;
-    border: none;
-    border-radius: 5px;
-
-    color: #fff;
-
-    cursor: pointer;
-    &:first-of-type {
-        margin-right: 10px;
-    }
+    flex-grow: 1;
 }
 
 // Tag Create
@@ -90,6 +84,9 @@
 
 // Tags
 #tag-list {
+    flex-grow: 1;
+    flex-basis: 0;
+    overflow-y: scroll;
     .tree-delete {
         display: none;
     }
@@ -101,10 +98,7 @@
 }
 
 #tag-header {
-    padding: 20px;
-    h2 {
-        margin: 0 0 20px 0;
-    }    
+    padding: 20px;  
 }
 
 .tag-meta {
@@ -168,4 +162,21 @@
 
 .selection-meta {
     font-size: 14px;
+}
+
+// Export Section
+#export-container {
+    padding: 20px;
+    border-top: 1px solid $brand-light;
+}
+
+#download-button {
+    width: 100%;
+    position: relative;
+
+    i {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+    }
 }
