@@ -62,11 +62,12 @@
   position: absolute;
   left: 0;
 
+  transition: left 0.10s ease-in;
+
   display: flex;
   flex-direction: row;
   height: 100%;
   padding: 10px 0;
-  // transform-style: preserve-3d;
 }
 
 .carousel-image-button {
@@ -96,9 +97,21 @@
     border-radius: 5px;
   }
 
+  .image-active-tags {
+    position: absolute;
+    display: flex;
+    left: 6px;
+    bottom: 6px;
+  }
+
   &.selected {
     .image-overlay {
       border: 2px solid #fff;
+    }
+
+    .image-active-tags {
+      left: 4px;
+      bottom: 4px;
     }
   }
 }
