@@ -53,11 +53,19 @@ export default class ImageUpload extends Vue {
   }
 
   deleteSelection(relatedTag: Tag, selectionToDelete: Selection) {
-    const relatedGroup = this.selectedImage?.selectionGroup.find(group => group.linkedTag.id === relatedTag.id);
+    if (!this.selectedImage) return;
 
+    const relatedGroupIndex = this.selectedImage.selectionGroup.findIndex(group => group.linkedTag.id === relatedTag.id);
+    const relatedGroup = this.selectedImage.selectionGroup[relatedGroupIndex];
+    
     if (relatedGroup) {
-      const selectionDeleteIndex = relatedGroup?.selections.findIndex(selection => selection.id === selectionToDelete.id);
-      relatedGroup?.selections.splice(selectionDeleteIndex, 1);
+      const selectionDeleteIndex = relatedGroup.selections.findIndex(selection => selection.id === selectionToDelete.id);
+      relatedGroup.selections.splice(selectionDeleteIndex, 1);
+
+      // If the selection group is now empty, delete it.
+      if (relatedGroup.selections.length < 1) {
+        this.selectedImage.selectionGroup.splice(relatedGroupIndex, 1);
+      }
     }
   }
 
