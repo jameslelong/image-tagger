@@ -43,7 +43,7 @@
 
         <!-- Export -->
         <div id="export-container">
-            <button id="download-button" class="default-button">
+            <button id="download-button" class="default-button" v-on:click="download()">
                 <i class="fas fa-download fa-sm"></i>
                 <span>Download</span>
             </button>

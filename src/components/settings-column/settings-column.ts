@@ -1,8 +1,9 @@
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { Tag } from "types/tag";
-import { EditorImage } from '@/types/image';
-import { Selection } from '@/types/selection';
 
+import JsonHandler from "services/output";
+import { Tag } from "types/tag";
+import { EditorImage } from 'types/image';
+import { Selection } from 'types/selection';
 
 @Component
 export default class ImageUpload extends Vue {
@@ -10,6 +11,8 @@ export default class ImageUpload extends Vue {
   @Prop(Tag) readonly selectedTag?: Tag;
   @Prop(Array) readonly images?: Array<EditorImage>;
   @Prop(EditorImage) readonly selectedImage?: EditorImage;
+
+  private readonly jsonHandler = new JsonHandler();
 
   private tagUID = 0;
   public tagNameInput = "";
@@ -89,11 +92,13 @@ export default class ImageUpload extends Vue {
     return foundGroup?.selections;
   }
 
-  // highlightTag(): void {
-
-  // }
-
   highlightSelection(selection: Selection, isHighlighted: boolean): void {
     selection.isHighlighted = isHighlighted;
+  }
+
+  download(): void {
+    if (!this.images) return;
+
+    this.jsonHandler.output(this.images);
   }
 }

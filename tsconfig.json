@@ -24,6 +24,9 @@
       "views/*": [
         "src/views/*"
       ],
+      "services/*": [
+        "src/services/*"
+      ],
       "assets/*": [
         "src/assets/*"
       ],
