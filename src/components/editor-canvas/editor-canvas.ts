@@ -252,8 +252,8 @@ export default class EditorCanvas extends Vue {
   drawImage(): void {
     if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
 
-    this.imageOffsetValue.x = (this.editorCanvas.width / 2) - (this.canvasImage.width / 2);
-    this.imageOffsetValue.y = (this.editorCanvas.height / 2) - (this.canvasImage.height / 2);
+    this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (this.canvasImage.width / 2));
+    this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (this.canvasImage.height / 2));
 
     this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y);
   }
