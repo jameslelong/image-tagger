@@ -19,14 +19,14 @@ import { Tag } from "types/tag";
 export default class Home extends Vue {
   // todo - start here, assign selection to selected tag
   public readonly images = new Array<EditorImage>();
-  public selectedImage: EditorImage = new EditorImage(-1, '');
+  public selectedImage: EditorImage = new EditorImage(-1, '', '');
   public readonly tags: Array<Tag> = new Array<Tag>();
   public selectedTag: Tag = new Tag(-1, '');
 
   private imageUID = 0;
 
-  createImage(encodedImage: string) {
-    const newImage = new EditorImage(this.imageUID++, encodedImage);
+  createImage(name: string, encodedImage: string) {
+    const newImage = new EditorImage(this.imageUID++, name, encodedImage);
     this.images.push(newImage);
   
     // replace the placeholder featured image with new image

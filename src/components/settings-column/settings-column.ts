@@ -1,6 +1,6 @@
 import { Component, Vue, Prop } from "vue-property-decorator";
 
-import JsonHandler from "services/output";
+import JsonHandler from "services/json-handler";
 import { Tag } from "types/tag";
 import { EditorImage } from 'types/image';
 import { Selection } from 'types/selection';

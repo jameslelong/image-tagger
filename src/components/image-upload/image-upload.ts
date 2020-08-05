@@ -47,7 +47,7 @@ export default class ImageUpload extends Vue {
 
     reader.onload = (e) => {
       if (e.target && e.target.result && typeof e.target.result === "string") {
-        this.$emit('image-uploaded', e.target.result);
+        this.$emit('image-uploaded', file.name, e.target.result);
       }
     };
 

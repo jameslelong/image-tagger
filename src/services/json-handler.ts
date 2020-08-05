@@ -10,13 +10,15 @@ export default class JsonHandler {
 
     // Loop Images
     images.forEach(image => {
+      const imageOutput = { file: image.name, regions: Array<object>() };
       // Loop Groups of Image
       image.selectionGroup.forEach(group => {
         // Loop Selections of Group
         group.selections.forEach(selection => {
           const topLeft: Vector2 = selection.findTopLeft();
 
-          output.push({
+          // Push the region to the specific image regions array
+          imageOutput.regions.push({
             rectangle: {
               x: topLeft.x,
               y: topLeft.y,
@@ -27,6 +29,9 @@ export default class JsonHandler {
           });
         }); 
       });
+
+      // Push Image & Regions to Output
+      output.push(imageOutput);
     });
     
     this.generateDownload(JSON.stringify(output));
