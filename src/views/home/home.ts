@@ -26,6 +26,9 @@ export default class Home extends Vue {
   private imageUID = 0;
 
   createImage(name: string, encodedImage: string) {
+    // Check that image doesn't already exist in the library
+    if (this.images.find(image => image.encodedImage === encodedImage)) return;
+
     const newImage = new EditorImage(this.imageUID++, name, encodedImage);
     this.images.push(newImage);
   
