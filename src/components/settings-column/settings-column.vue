@@ -23,7 +23,7 @@
                             <span class="tag-name">{{ tag.name }}</span>
                         </div>
                         <button class="tree-delete" v-on:click="deleteTag(tag)">
-                            <i class="fas fa-times fa-xs"></i>
+                            <i class="fas fa-trash fa-xs"></i>
                         </button>
                     </div>
                     <!-- Nest Selection List -->
@@ -33,7 +33,7 @@
                                 x: {{ selection.a.x }}, y: {{ selection.a.y }}
                             </span>
                             <button class="tree-delete" v-on:click="deleteSelection(tag, selection)">
-                                <i class="fas fa-times fa-xs"></i>
+                                <i class="fas fa-trash fa-xs"></i>
                             </button>
                         </li>
                     </ul>

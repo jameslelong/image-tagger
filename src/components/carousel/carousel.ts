@@ -17,6 +17,30 @@ export default class Carousel extends Vue {
   selectImage(image: EditorImage): void {
     this.$emit('image-selected', image);
   }
+
+  deleteImage(imageToDelete: EditorImage): void {
+    if (!this.images || !this.selectedImage) return;
+
+    // Remove tag from library
+    const imageDeleteIndex = this.images.findIndex(image => image.id === imageToDelete.id);
+
+    // If image to delete is selected, select the image before or after it
+    if (imageToDelete.id === this.selectedImage.id) {
+      
+      if (this.images.length > 1) {
+        if (imageDeleteIndex > 0) {
+          this.selectImage(this.images[imageDeleteIndex - 1]);
+        } else {
+          this.selectImage(this.images[imageDeleteIndex + 1]);
+        }
+      } else {
+        this.selectImage(new EditorImage(-1, '', ''));
+      }
+    }
+    
+    // Delete image by index
+    this.images.splice(imageDeleteIndex, 1);
+  }
   
   prev(): void {
     if (!this.carousel) return;

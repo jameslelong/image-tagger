@@ -40,8 +40,12 @@ export default class EditorCanvas extends Vue {
   onSelectedImageChanged(image: EditorImage) {
     if (!this.editorContext) return;
 
-    this.canvasImage = new Image();
-    this.canvasImage.src = image.encodedImage;
+    if (image) {
+      this.canvasImage = new Image();
+      this.canvasImage.src = image.encodedImage;  
+    } else {
+      this.clearCanvas();
+    }
   }
 
   mouseDown(e: MouseEvent): void {
@@ -217,8 +221,7 @@ export default class EditorCanvas extends Vue {
     // Draw canvas
     if (this.editorCanvas && this.editorContext && this.selectedImage && this.selectedTag) {
 
-      // Clear Canvas
-      this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
+      this.clearCanvas();
 
       // Draw image
       this.drawImage();
@@ -286,5 +289,11 @@ export default class EditorCanvas extends Vue {
 
     this.editorContext.font = "16px roboto";
     this.editorContext.fillText(groupName, relativeTopLeft.x + 5, relativeTopLeft.y + 19);
+  }
+
+  clearCanvas(): void {
+    if (!this.editorContext || !this.editorCanvas) return;
+
+    this.editorContext.clearRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
   }
 }

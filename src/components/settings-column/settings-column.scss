@@ -76,6 +76,10 @@
     cursor: pointer;
     border-radius: 15px;
 
+    i {
+        margin-bottom: 4px;
+    }
+
     &:hover {
         background-color: $brand-red;
         color: #fff;
