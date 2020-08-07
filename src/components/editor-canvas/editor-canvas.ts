@@ -34,6 +34,13 @@ export default class EditorCanvas extends Vue {
     // Resize Event
     this.resizeCanvas();
     window.addEventListener("resize", this.resizeCanvas);
+
+    // Key Down Binding
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        this.endSelection();
+      }
+    });
   }
 
   @Watch('selectedImage')
@@ -98,8 +105,14 @@ export default class EditorCanvas extends Vue {
       this.createNewSelection(this.newSelection);
     }
 
-    this.activePoints = new Array<SelectionPoint>();
-    this.previousMousePos = this.activeSelection = this.newSelection = undefined;
+    this.endSelection();
+  }
+
+  endSelection(): void {
+    if (this.activeSelection) {
+      this.activePoints = new Array<SelectionPoint>();
+      this.previousMousePos = this.activeSelection = this.newSelection = undefined;      
+    }
   }
 
   /**
