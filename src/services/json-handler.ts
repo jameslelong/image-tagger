@@ -23,7 +23,7 @@ export default class JsonHandler {
               x: topLeft.x,
               y: topLeft.y,
               h: selection.absHeight,
-              w: selection.absHeight
+              w: selection.absWidth
             },
             object: group.linkedTag.name
           });
