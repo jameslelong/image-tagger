@@ -133,6 +133,10 @@ export default class EditorCanvas extends Vue {
     selectionBasedTag.selections.push(selection);
   }
   
+  /**
+   * Check mouse position against each selection and their anchors, returning matching points and selections
+   * @param mousePos 
+   */
   checkSelectionAnchors(mousePos: Vector2): { foundPoints: Array<SelectionPoint>, foundSelection: Selection } | void {
     if (!this.editorContext|| !this.editorCanvas || !this.selectedImage) return;
 
@@ -140,7 +144,7 @@ export default class EditorCanvas extends Vue {
     let foundSelection: Selection | undefined;
 
     for (const tag of this.selectedImage.selectionGroup) {
-      for (const selection of tag.selections) { // todo - this loop here is ary
+      for (const selection of tag.selections) {
         for (let i = 0, j = 3; i <= j; i++) {
           const currPoint = selection.genericPointGet(i);
           const nextPoint = selection.genericPointGet((i + 1) % 4);
@@ -195,6 +199,12 @@ export default class EditorCanvas extends Vue {
     }
   }
   
+  /**
+   * Check if point a is within point b and c
+   * @param a 
+   * @param b 
+   * @param c 
+   */
   isWithin(a: Vector2, b: Vector2, c: Vector2): boolean {
     const isWithinX = (a.x < b.x && a.x > c.x) || (a.x > b.x && a.x < c.x);
     const isWithinY = (a.y < b.y && a.y > c.y) || (a.y > b.y && a.y < c.y);
@@ -225,11 +235,14 @@ export default class EditorCanvas extends Vue {
     return new Vector2(mousePosX, mousePosY);
   }
 
+  /**
+   * Clear then draw the selection image and it's selections on the canvas
+   * @param timestamp 
+   */
   animationStep(timestamp: number): void {
     if (this.startTimestamp === undefined) {
       this.startTimestamp = timestamp;
     }
-    const elapsed = timestamp - this.startTimestamp;
     
     // Draw canvas
     if (this.editorCanvas && this.editorContext && this.selectedImage && this.selectedTag) {
@@ -255,8 +268,11 @@ export default class EditorCanvas extends Vue {
     window.requestAnimationFrame(this.animationStep);
   }
 
+  /**
+   * Resize the canvas based on the height and width set by CSS
+   */
   resizeCanvas(): void {
-    if (!this.editorCanvas?.parentElement || !this.editorContext) return;
+    if (!this.editorCanvas?.parentElement) return;
 
     this.editorCanvas.height = this.editorCanvas.parentElement.clientHeight;
     this.editorCanvas.width = this.editorCanvas.parentElement.clientWidth;

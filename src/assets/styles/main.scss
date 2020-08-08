@@ -1,6 +1,7 @@
 @import "colour.scss";
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
+// Global Styles
 .default-button {
     border: none;
     background-color: $brand-blue;
@@ -32,7 +33,7 @@
     color: #fff;
 }
 
-// Reset - todo - improve
+// Reset
 * {
     box-sizing: border-box;
     font-family: 'Roboto', sans-serif;

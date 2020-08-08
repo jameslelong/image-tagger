@@ -21,7 +21,7 @@ export default class ImageUpload extends Vue {
     }
   }
 
-  onChange(e: any): void { // todo - need to get type
+  onChange(e: any): void {
     const files = e.target?.files;
 
     if (files) {

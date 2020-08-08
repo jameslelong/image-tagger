@@ -17,7 +17,6 @@ import { Tag } from "types/tag";
   }
 })
 export default class Home extends Vue {
-  // todo - start here, assign selection to selected tag
   public readonly images = new Array<EditorImage>();
   public selectedImage: EditorImage = new EditorImage(-1, '', '');
   public readonly tags: Array<Tag> = new Array<Tag>();

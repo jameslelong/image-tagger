@@ -18,6 +18,9 @@ export default class ImageUpload extends Vue {
   public tagNameInput = "";
   public activeBranches = new Array<number>();
 
+  /**
+   * Add tag to tag array, doesn't allow for duplicates
+   */
   createTag(): void {
     if (!this.tagNameInput || !this.tags) return;
 
@@ -36,10 +39,14 @@ export default class ImageUpload extends Vue {
     this.$emit("tag-selected", tagToSelect);
   }
 
+  /**
+   * Remove tag from tags array, removing selections related to that tag from each image
+   * @param tagToDelete 
+   */
   deleteTag(tagToDelete: Tag): void {
     if (!this.tags || !this.images) return;
 
-    // Remove tag from library
+    // Remove tag from tags array
     const tagDeleteIndex = this.tags.findIndex(tag => tag.id === tagToDelete.id);
     this.tags.splice(tagDeleteIndex, 1);
 
@@ -55,6 +62,11 @@ export default class ImageUpload extends Vue {
     }
   }
 
+  /**
+   * Delete selection from specific image
+   * @param relatedTag 
+   * @param selectionToDelete 
+   */
   deleteSelection(relatedTag: Tag, selectionToDelete: Selection) {
     if (!this.selectedImage) return;
 
@@ -72,6 +84,10 @@ export default class ImageUpload extends Vue {
     }
   }
 
+  /**
+   * Toggle branch of tree view
+   * @param tag 
+   */
   toggleBranch(tag: Tag): void {
     const foundIndex = this.activeBranches.indexOf(tag.id);
 
@@ -87,7 +103,6 @@ export default class ImageUpload extends Vue {
   }
 
   selectionsOfTag(tag: Tag): Array<Selection> | undefined {
-    // todo - confirm the performance of this
     const foundGroup = this.selectedImage?.selectionGroup.find(group => group.linkedTag.id === tag.id);
     return foundGroup?.selections;
   }

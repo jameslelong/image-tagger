@@ -2,9 +2,6 @@ import { EditorImage } from 'types/image';
 import Vector2 from 'types/vector2';
 
 export default class JsonHandler {
-  // todo - need a proper Json structure to use
-  // todo - "rectangle"s need to be linked to images in the output JSON
-
   public output(images: Array<EditorImage>): void {
     const output = new Array<object>();
 
