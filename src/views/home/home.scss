@@ -1,7 +1,10 @@
+#container {
+  background-color: $brand-darker;
+}
+
 #home {
   height: 100vh;
   width: 100%;
-  background-color: $brand-darker;
 }
 
 #primary-area {
@@ -11,4 +14,27 @@
 
 #editor-column {
   width: calc(100% - 250px);
+}
+
+#screen-size-alert {
+  display: none;
+  height: 100vh;
+  width: 100%;
+
+  align-items: center;
+  justify-content: center;
+
+  p {
+    color: #fff;
+  }
+}
+
+@media (max-width: 928px), (max-height: 600px) {
+  #screen-size-alert {
+    display: flex;
+  }
+
+  #home {
+    display: none;
+  }
 }
