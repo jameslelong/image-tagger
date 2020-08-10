@@ -11,6 +11,7 @@ export default class EditorCanvas extends Vue {
 
   private readonly OFFSET_VALUE: number = 10;
   private selectionUID = 0;
+  private scale = 1;
 
   public editorCanvas?: HTMLCanvasElement;
   public editorContext?: CanvasRenderingContext2D;
@@ -53,6 +54,18 @@ export default class EditorCanvas extends Vue {
     } else {
       this.clearCanvas();
     }
+  }
+
+  mouseWheel(e: WheelEvent): void {
+    // todo - only scale the image and selection x/y, using context scale will modify the selection styles which I don't want
+    e.preventDefault();
+
+    const val = this.scale + e.deltaY * -0.01;
+
+    // Restrict scale
+    this.scale = Math.min(Math.max(.125, val), 4);
+
+    console.log(this.scale);
   }
 
   mouseDown(e: MouseEvent): void {
@@ -245,7 +258,7 @@ export default class EditorCanvas extends Vue {
     }
     
     // Draw canvas
-    if (this.editorCanvas && this.editorContext && this.selectedImage && this.selectedTag) {
+    if (this.editorCanvas && this.editorContext && this.selectedImage) {
 
       this.clearCanvas();
 
@@ -253,7 +266,7 @@ export default class EditorCanvas extends Vue {
       this.drawImage();
 
       // Draw new selection rectangle
-      if (this.newSelection) {
+      if (this.newSelection && this.selectedTag) {
         this.drawRectangle(this.newSelection, this.selectedTag.name);
       }
       
@@ -284,10 +297,13 @@ export default class EditorCanvas extends Vue {
   drawImage(): void {
     if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
 
-    this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (this.canvasImage.width / 2));
-    this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (this.canvasImage.height / 2));
+    const scaledWidth = this.canvasImage.width * this.scale;
+    const scaledHeight = this.canvasImage.height * this.scale;
 
-    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y);
+    this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (scaledWidth / 2));
+    this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (scaledHeight / 2));
+
+    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y, scaledWidth, scaledHeight);
   }
 
   drawRectangle(selection: Selection, groupName: string): void {
