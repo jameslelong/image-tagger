@@ -297,29 +297,29 @@ export default class EditorCanvas extends Vue {
   drawImage(): void {
     if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
 
-    const scaledWidth = this.canvasImage.width * this.scale;
-    const scaledHeight = this.canvasImage.height * this.scale;
+    const scaledImageWidth = this.canvasImage.width * this.scale;
+    const scaledImageHeight = this.canvasImage.height * this.scale;
 
-    this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (scaledWidth / 2));
-    this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (scaledHeight / 2));
+    this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (scaledImageWidth / 2));
+    this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (scaledImageHeight / 2));
 
-    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y, scaledWidth, scaledHeight);
+    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y, scaledImageWidth, scaledImageHeight);
   }
 
   drawRectangle(selection: Selection, groupName: string): void {
     if (!this.editorContext || !this.editorCanvas) return;
 
-    const relativeA = this.offsetVectorByVector(selection.a, this.imageOffsetValue);
-    const relativeB = this.offsetVectorByVector(selection.b, this.imageOffsetValue);
-    const relativeC = this.offsetVectorByVector(selection.c, this.imageOffsetValue);
-    const relativeD = this.offsetVectorByVector(selection.d, this.imageOffsetValue);
+    const relativeA = this.offsetVectorByVector(new Vector2(selection.a.x * this.scale, selection.a.y * this.scale), this.imageOffsetValue);
+    const relativeB = this.offsetVectorByVector(new Vector2(selection.b.x * this.scale, selection.b.y * this.scale), this.imageOffsetValue);
+    const relativeC = this.offsetVectorByVector(new Vector2(selection.c.x * this.scale, selection.c.y * this.scale), this.imageOffsetValue);
+    const relativeD = this.offsetVectorByVector(new Vector2(selection.d.x * this.scale, selection.d.y * this.scale), this.imageOffsetValue);
 
     const colorHex = selection.isHighlighted ? "#0000FF" : "#FF0000"; 
 
     // Animate/Draw Here
     // Stroke
     this.editorContext.strokeStyle = colorHex;
-    this.editorContext.strokeRect(relativeA.x, relativeA.y, selection.relHeight, selection.relWidth);
+    this.editorContext.strokeRect(relativeA.x, relativeA.y, selection.relHeight * this.scale, selection.relWidth * this.scale);
 
     // Anchors
     this.editorContext.fillStyle = colorHex;
@@ -330,7 +330,7 @@ export default class EditorCanvas extends Vue {
 
     // Text
     const topLeft = selection.findTopLeft();
-    const relativeTopLeft = this.offsetVectorByVector(topLeft, this.imageOffsetValue);
+    const relativeTopLeft = this.offsetVectorByVector(new Vector2(topLeft.x * this.scale, topLeft.y * this.scale), this.imageOffsetValue);
 
     this.editorContext.font = "16px roboto";
     this.editorContext.fillText(groupName, relativeTopLeft.x + 5, relativeTopLeft.y + 19);
