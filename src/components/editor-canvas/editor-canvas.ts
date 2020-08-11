@@ -12,6 +12,7 @@ export default class EditorCanvas extends Vue {
   private readonly OFFSET_VALUE: number = 10;
   private selectionUID = 0;
   private scale = 1;
+  private pan = new Vector2(0, 0);
 
   public editorCanvas?: HTMLCanvasElement;
   public editorContext?: CanvasRenderingContext2D;
@@ -60,16 +61,13 @@ export default class EditorCanvas extends Vue {
     // todo - only scale the image and selection x/y, using context scale will modify the selection styles which I don't want
     e.preventDefault();
 
-    const val = this.scale + e.deltaY * -0.01;
+    const val = this.scale + e.deltaY * -0.02;
 
     // Restrict scale
     this.scale = Math.min(Math.max(.125, val), 4);
-
-    console.log(this.scale);
   }
 
   mouseDown(e: MouseEvent): void {
-    // Todo - this is getting a bit overboard, all these checks are going to become too much
     if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage || !this.selectedTag || this.selectedTag.name === "") return;
     
     const mousePos: Vector2 = this.getRelativeMousePos(this.editorCanvas, e);
@@ -242,8 +240,8 @@ export default class EditorCanvas extends Vue {
     // https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas - relative mouse position
 
     const rect = canvas.getBoundingClientRect();
-    const mousePosX = (e.clientX - rect.left) - this.imageOffsetValue.x;
-    const mousePosY = (e.clientY - rect.top) - this.imageOffsetValue.y;
+    const mousePosX = Math.round(((e.clientX - rect.left) - this.imageOffsetValue.x) / this.scale);
+    const mousePosY = Math.round(((e.clientY - rect.top) - this.imageOffsetValue.y) / this.scale);
   
     return new Vector2(mousePosX, mousePosY);
   }
