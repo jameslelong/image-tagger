@@ -26,6 +26,9 @@ export default class EditorCanvas extends Vue {
   private previousMousePos?: Vector2;
   private imageOffsetValue = new Vector2(0,0);
 
+  private isMouseDown = false;
+  private isControlDown = false;
+
   mounted(): void {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
     this.editorContext = this.editorCanvas.getContext("2d") as CanvasRenderingContext2D;
@@ -41,6 +44,21 @@ export default class EditorCanvas extends Vue {
     window.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         this.endSelection();
+      }
+
+      if (event.key === "Control") {
+        this.isControlDown = true;
+
+        if (this.editorCanvas && !this.activeSelection) {
+          this.editorCanvas.style.cursor = "move";
+        }
+      }
+    });
+
+    window.addEventListener("keyup", event => {
+      this.isControlDown = false;
+      if (this.editorCanvas && !this.activeSelection) {
+        this.editorCanvas.style.cursor = "default";
       }
     });
   }
@@ -68,8 +86,15 @@ export default class EditorCanvas extends Vue {
   }
 
   mouseDown(e: MouseEvent): void {
+    this.isMouseDown = true;
+    
     if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage || !this.selectedTag || this.selectedTag.name === "") return;
     
+    if (this.isControlDown) {
+      return;
+    }
+    
+
     const mousePos: Vector2 = this.getRelativeMousePos(this.editorCanvas, e);
     const selectionCheck = this.checkSelectionAnchors(mousePos);
 
@@ -90,6 +115,14 @@ export default class EditorCanvas extends Vue {
 
     const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
 
+    if (this.isControlDown && !this.activeSelection) {
+      if (this.isMouseDown) {
+        this.panImage();
+      }
+      return;
+    }
+
+    // todo - shift this into a new function? Same with MouseDown and MouseUp
     if (!this.activeSelection) {
       this.checkSelectionAnchors(mousePos);
     } else {
@@ -110,6 +143,8 @@ export default class EditorCanvas extends Vue {
   }
 
   mouseUp(e: MouseEvent): void {
+    this.isMouseDown = false;
+
     if (!this.activeSelection) return;
 
     if (this.newSelection) {
@@ -124,6 +159,10 @@ export default class EditorCanvas extends Vue {
       this.activePoints = new Array<SelectionPoint>();
       this.previousMousePos = this.activeSelection = this.newSelection = undefined;      
     }
+  }
+
+  panImage(): void {
+    if (!this.editorCanvas || !this.editorContext) return;
   }
 
   /**
