@@ -11,8 +11,10 @@ export default class EditorCanvas extends Vue {
 
   private readonly OFFSET_VALUE: number = 10;
   private selectionUID = 0;
+  
+  private previousMousePos?: Vector2;
   private scale = 1;
-  private pan = new Vector2(0, 0);
+  private imageOffsetValue = new Vector2(0,0);
 
   public editorCanvas?: HTMLCanvasElement;
   public editorContext?: CanvasRenderingContext2D;
@@ -22,9 +24,6 @@ export default class EditorCanvas extends Vue {
   public newSelection?: Selection;
   public activeSelection?: Selection;
   public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
-
-  private previousMousePos?: Vector2;
-  private imageOffsetValue = new Vector2(0,0);
 
   private isMouseDown = false;
   private isControlDown = false;
@@ -40,27 +39,37 @@ export default class EditorCanvas extends Vue {
     this.resizeCanvas();
     window.addEventListener("resize", this.resizeCanvas);
 
-    // Key Down Binding
+    // Leave Page Event
+    window.addEventListener("beforeunload", event => {
+      this.onControlRaise();
+    });
+    
+    // Key Down Event
     window.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         this.endSelection();
       }
 
       if (event.key === "Control") {
-        this.isControlDown = true;
-
-        if (this.editorCanvas && !this.activeSelection) {
-          this.editorCanvas.style.cursor = "move";
-        }
+        this.onControlRaise();
       }
     });
 
+    // Key Up Event
     window.addEventListener("keyup", event => {
       this.isControlDown = false;
       if (this.editorCanvas && !this.activeSelection) {
         this.editorCanvas.style.cursor = "default";
       }
     });
+  }
+
+  onControlRaise(): void {
+    this.isControlDown = true;
+
+    if (this.editorCanvas && !this.activeSelection) {
+      this.editorCanvas.style.cursor = "move";
+    }
   }
 
   @Watch('selectedImage')
@@ -76,7 +85,6 @@ export default class EditorCanvas extends Vue {
   }
 
   mouseWheel(e: WheelEvent): void {
-    // todo - only scale the image and selection x/y, using context scale will modify the selection styles which I don't want
     e.preventDefault();
 
     const val = this.scale + e.deltaY * -0.02;
@@ -115,19 +123,27 @@ export default class EditorCanvas extends Vue {
 
     const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
 
+    // todo - this whole area will need a pass to make it work better when panning OR selecting, as they share a lot of values. May need to abstract into functions? But also potentially pointless
+    // todo - it's sort of working, but for whatever reason it's flashing about, the image offset value might be jumping about?
+    // const - UPDATE - it's flashing about due to relativeMousePos taking into account the image offset, which is what I am editing here. I need to do some refactoring here, it's getting a bit jank...
+
+    // Image Offset Handling
     if (this.isControlDown && !this.activeSelection) {
-      if (this.isMouseDown) {
-        this.panImage();
+      if (this.isMouseDown && this.previousMousePos) {
+        const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+        this.imageOffsetValue.x = this.imageOffsetValue.x + (offset.x * this.scale);
+        this.imageOffsetValue.y = this.imageOffsetValue.y + (offset.y * this.scale);
       }
+      this.previousMousePos = mousePos;
       return;
     }
 
-    // todo - shift this into a new function? Same with MouseDown and MouseUp
+    // Selection Handling
     if (!this.activeSelection) {
       this.checkSelectionAnchors(mousePos);
     } else {
       if (this.previousMousePos && this.activePoints) {
-        const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+        const offset: Vector2 = new Vector2((mousePos.x - this.previousMousePos.x) - this.imageOffsetValue.x, (mousePos.y - this.previousMousePos.y) - this.imageOffsetValue.y);
         for (let i = 0, j = 3; i <= j; i++) {
           const point = this.activeSelection.genericPointGet(i);
           const offsetPos = new Vector2(point.x + offset.x, point.y + offset.y);
@@ -137,8 +153,7 @@ export default class EditorCanvas extends Vue {
           }
         }
       }
-  
-      this.previousMousePos = mousePos;   
+      this.previousMousePos = mousePos;  
     }
   }
 
@@ -159,10 +174,6 @@ export default class EditorCanvas extends Vue {
       this.activePoints = new Array<SelectionPoint>();
       this.previousMousePos = this.activeSelection = this.newSelection = undefined;      
     }
-  }
-
-  panImage(): void {
-    if (!this.editorCanvas || !this.editorContext) return;
   }
 
   /**
@@ -279,8 +290,8 @@ export default class EditorCanvas extends Vue {
     // https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas - relative mouse position
 
     const rect = canvas.getBoundingClientRect();
-    const mousePosX = Math.round(((e.clientX - rect.left) - this.imageOffsetValue.x) / this.scale);
-    const mousePosY = Math.round(((e.clientY - rect.top) - this.imageOffsetValue.y) / this.scale);
+    const mousePosX = Math.round((e.clientX - rect.left) / this.scale);
+    const mousePosY = Math.round((e.clientY - rect.top) / this.scale);
   
     return new Vector2(mousePosX, mousePosY);
   }
@@ -337,8 +348,10 @@ export default class EditorCanvas extends Vue {
     const scaledImageWidth = this.canvasImage.width * this.scale;
     const scaledImageHeight = this.canvasImage.height * this.scale;
 
-    this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (scaledImageWidth / 2));
-    this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (scaledImageHeight / 2));
+    // todo - have to remove this centering as it'll reset the pan offset. But I don't want to throw away image centering, only call this on inital image render or by recentre button?
+    // this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (scaledImageWidth / 2));
+    // this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (scaledImageHeight / 2));
+    // console.log(this.imageOffsetValue.x, this.imageOffsetValue.y);
 
     this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y, scaledImageWidth, scaledImageHeight);
   }
