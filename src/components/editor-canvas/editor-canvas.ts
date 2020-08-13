@@ -123,14 +123,10 @@ export default class EditorCanvas extends Vue {
 
     const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
 
-    // todo - this whole area will need a pass to make it work better when panning OR selecting, as they share a lot of values. May need to abstract into functions? But also potentially pointless
-    // todo - it's sort of working, but for whatever reason it's flashing about, the image offset value might be jumping about?
-    // const - UPDATE - it's flashing about due to relativeMousePos taking into account the image offset, which is what I am editing here. I need to do some refactoring here, it's getting a bit jank...
-
     // Image Offset Handling
     if (this.isControlDown && !this.activeSelection) {
       if (this.isMouseDown && this.previousMousePos) {
-        const offset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+        const offset: Vector2 = new Vector2((mousePos.x - this.previousMousePos.x) / this.scale, (mousePos.y - this.previousMousePos.y) / this.scale);
         this.imageOffsetValue.x = this.imageOffsetValue.x + (offset.x * this.scale);
         this.imageOffsetValue.y = this.imageOffsetValue.y + (offset.y * this.scale);
       }
@@ -138,31 +134,34 @@ export default class EditorCanvas extends Vue {
       return;
     }
 
+    // todo - Manage all offset and scaling logic here. and then replace previous mouse pos logic with these variables
+    const scaledMousePos = new Vector2((mousePos.x + this.imageOffsetValue.x) / this.scale, (mousePos.y + this.imageOffsetValue.y) / this.scale);
+    const scaledPreviousMousePos = this.previousMousePos ? new Vector2((this.previousMousePos.x + this.imageOffsetValue.x) / this.scale, (this.previousMousePos.y + this.imageOffsetValue.y) / this.scale) : undefined;
+
     // Selection Handling
     if (!this.activeSelection) {
       this.checkSelectionAnchors(mousePos);
     } else {
       if (this.previousMousePos && this.activePoints) {
-        const offset: Vector2 = new Vector2((mousePos.x - this.previousMousePos.x) - this.imageOffsetValue.x, (mousePos.y - this.previousMousePos.y) - this.imageOffsetValue.y);
+        const previousMouseOffset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+
         for (let i = 0, j = 3; i <= j; i++) {
           const point = this.activeSelection.genericPointGet(i);
-          const offsetPos = new Vector2(point.x + offset.x, point.y + offset.y);
-    
+          const newPointValue = new Vector2(point.x + previousMouseOffset.x, point.y + previousMouseOffset.y);
+
           if (this.activePoints.includes(i)) {
-            this.activeSelection.genericPointSet(i, offsetPos);
+            this.activeSelection.genericPointSet(i, newPointValue);
           }
         }
       }
-      this.previousMousePos = mousePos;  
+      this.previousMousePos = mousePos;
     }
   }
 
   mouseUp(e: MouseEvent): void {
     this.isMouseDown = false;
 
-    if (!this.activeSelection) return;
-
-    if (this.newSelection) {
+    if (this.newSelection && this.activeSelection) {
       this.createNewSelection(this.newSelection);
     }
 
@@ -172,8 +171,9 @@ export default class EditorCanvas extends Vue {
   endSelection(): void {
     if (this.activeSelection) {
       this.activePoints = new Array<SelectionPoint>();
-      this.previousMousePos = this.activeSelection = this.newSelection = undefined;      
     }
+
+    this.previousMousePos = this.activeSelection = this.newSelection = undefined;      
   }
 
   /**
@@ -290,8 +290,8 @@ export default class EditorCanvas extends Vue {
     // https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas - relative mouse position
 
     const rect = canvas.getBoundingClientRect();
-    const mousePosX = Math.round((e.clientX - rect.left) / this.scale);
-    const mousePosY = Math.round((e.clientY - rect.top) / this.scale);
+    const mousePosX = Math.round((e.clientX - rect.left));
+    const mousePosY = Math.round((e.clientY - rect.top));
   
     return new Vector2(mousePosX, mousePosY);
   }
