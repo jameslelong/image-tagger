@@ -128,10 +128,12 @@ export default class EditorCanvas extends Vue {
 
     const mousePosOffset = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
 
-    if (this.isControlDown && !this.activeSelection && this.isMouseDown) {
+    if (this.isControlDown && !this.activeSelection) {
       // Pan Mode
-      this.imageOffsetValue.x += mousePosOffset.x;
-      this.imageOffsetValue.y += mousePosOffset.y;
+      if (this.isMouseDown) {
+        this.imageOffsetValue.x += mousePosOffset.x;
+        this.imageOffsetValue.y += mousePosOffset.y;
+      }
     } else {
       // Selection Handling
       const scaledMousePos = new Vector2(Math.round((mousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((mousePos.y - this.imageOffsetValue.y) / this.scale));
@@ -357,7 +359,7 @@ export default class EditorCanvas extends Vue {
   }
 
   /**
-   * Handles drawing the canvasImage in the center of the canvas
+   * Handles drawing the canvasImage, taking into account scale and offset
    */
   drawImage(): void {
     if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
