@@ -102,9 +102,9 @@ export default class EditorCanvas extends Vue {
       return;
     }
     
-
     const mousePos: Vector2 = this.getRelativeMousePos(this.editorCanvas, e);
-    const selectionCheck = this.checkSelectionAnchors(mousePos);
+    const scaledMousePos = new Vector2(Math.round((mousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((mousePos.y - this.imageOffsetValue.y) / this.scale));
+    const selectionCheck = this.checkSelectionAnchors(scaledMousePos);
 
     if (selectionCheck) {
       this.activeSelection = selectionCheck.foundSelection;
@@ -113,7 +113,7 @@ export default class EditorCanvas extends Vue {
 
     // Create New Selection
     if (this.activeSelection === undefined && this.activePoints.length === 0) {
-      this.activeSelection = this.newSelection = new Selection(this.selectionUID++, mousePos);
+      this.activeSelection = this.newSelection = new Selection(this.selectionUID++, scaledMousePos);
       this.activePoints.push(SelectionPoint.c);
     }
   }
@@ -122,32 +122,29 @@ export default class EditorCanvas extends Vue {
     if (!this.editorContext|| !this.editorCanvas) return;
 
     const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
+    if (!this.previousMousePos) this.previousMousePos = mousePos;
 
-    // Image Offset Handling
-    if (this.isControlDown && !this.activeSelection) {
-      if (this.isMouseDown && this.previousMousePos) {
-        const offset: Vector2 = new Vector2((mousePos.x - this.previousMousePos.x) / this.scale, (mousePos.y - this.previousMousePos.y) / this.scale);
-        this.imageOffsetValue.x = this.imageOffsetValue.x + (offset.x * this.scale);
-        this.imageOffsetValue.y = this.imageOffsetValue.y + (offset.y * this.scale);
-      }
+    const scaledMousePos = new Vector2(Math.round((mousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((mousePos.y - this.imageOffsetValue.y) / this.scale));
+    const scaledPreviousMousePos = new Vector2(Math.round((this.previousMousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((this.previousMousePos.y - this.imageOffsetValue.y) / this.scale));
+    const scaledMousePosOffset = new Vector2(scaledMousePos.x - scaledPreviousMousePos.x, scaledMousePos.y - scaledPreviousMousePos.y);
+    const mousePosOffset = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
+
+    // Pan Mode
+    if (this.isControlDown && !this.activeSelection && this.isMouseDown) {
+      this.imageOffsetValue.x += mousePosOffset.x;
+      this.imageOffsetValue.y += mousePosOffset.y;
       this.previousMousePos = mousePos;
       return;
-    }
+    }   
 
-    // todo - Manage all offset and scaling logic here. and then replace previous mouse pos logic with these variables
-    const scaledMousePos = new Vector2((mousePos.x + this.imageOffsetValue.x) / this.scale, (mousePos.y + this.imageOffsetValue.y) / this.scale);
-    const scaledPreviousMousePos = this.previousMousePos ? new Vector2((this.previousMousePos.x + this.imageOffsetValue.x) / this.scale, (this.previousMousePos.y + this.imageOffsetValue.y) / this.scale) : undefined;
-
-    // Selection Handling
+    // Selection Mode
     if (!this.activeSelection) {
-      this.checkSelectionAnchors(mousePos);
+      this.checkSelectionAnchors(scaledMousePos);
     } else {
-      if (this.previousMousePos && this.activePoints) {
-        const previousMouseOffset: Vector2 = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
-
+      if (scaledPreviousMousePos && this.activePoints) {
         for (let i = 0, j = 3; i <= j; i++) {
           const point = this.activeSelection.genericPointGet(i);
-          const newPointValue = new Vector2(point.x + previousMouseOffset.x, point.y + previousMouseOffset.y);
+          const newPointValue = new Vector2(point.x + scaledMousePosOffset.x, point.y + scaledMousePosOffset.y);
 
           if (this.activePoints.includes(i)) {
             this.activeSelection.genericPointSet(i, newPointValue);
@@ -156,6 +153,8 @@ export default class EditorCanvas extends Vue {
       }
       this.previousMousePos = mousePos;
     }
+
+    this.previousMousePos = mousePos;
   }
 
   mouseUp(e: MouseEvent): void {
@@ -290,8 +289,8 @@ export default class EditorCanvas extends Vue {
     // https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas - relative mouse position
 
     const rect = canvas.getBoundingClientRect();
-    const mousePosX = Math.round((e.clientX - rect.left));
-    const mousePosY = Math.round((e.clientY - rect.top));
+    const mousePosX = e.clientX - rect.left;
+    const mousePosY = e.clientY - rect.top;
   
     return new Vector2(mousePosX, mousePosY);
   }
