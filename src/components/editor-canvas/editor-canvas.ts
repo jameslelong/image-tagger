@@ -124,34 +124,31 @@ export default class EditorCanvas extends Vue {
     const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
     if (!this.previousMousePos) this.previousMousePos = mousePos;
 
-    const scaledMousePos = new Vector2(Math.round((mousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((mousePos.y - this.imageOffsetValue.y) / this.scale));
-    const scaledPreviousMousePos = new Vector2(Math.round((this.previousMousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((this.previousMousePos.y - this.imageOffsetValue.y) / this.scale));
-    const scaledMousePosOffset = new Vector2(scaledMousePos.x - scaledPreviousMousePos.x, scaledMousePos.y - scaledPreviousMousePos.y);
     const mousePosOffset = new Vector2(mousePos.x - this.previousMousePos.x, mousePos.y - this.previousMousePos.y);
 
-    // Pan Mode
     if (this.isControlDown && !this.activeSelection && this.isMouseDown) {
+      // Pan Mode
       this.imageOffsetValue.x += mousePosOffset.x;
       this.imageOffsetValue.y += mousePosOffset.y;
-      this.previousMousePos = mousePos;
-      return;
-    }   
-
-    // Selection Mode
-    if (!this.activeSelection) {
-      this.checkSelectionAnchors(scaledMousePos);
     } else {
-      if (scaledPreviousMousePos && this.activePoints) {
-        for (let i = 0, j = 3; i <= j; i++) {
-          const point = this.activeSelection.genericPointGet(i);
-          const newPointValue = new Vector2(point.x + scaledMousePosOffset.x, point.y + scaledMousePosOffset.y);
-
-          if (this.activePoints.includes(i)) {
-            this.activeSelection.genericPointSet(i, newPointValue);
+      // Selection Handling
+      const scaledMousePos = new Vector2(Math.round((mousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((mousePos.y - this.imageOffsetValue.y) / this.scale));
+      if (!this.activeSelection) {
+        this.checkSelectionAnchors(scaledMousePos);
+      } else {
+        const scaledPreviousMousePos = new Vector2(Math.round((this.previousMousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((this.previousMousePos.y - this.imageOffsetValue.y) / this.scale));
+        const scaledMousePosOffset = new Vector2(scaledMousePos.x - scaledPreviousMousePos.x, scaledMousePos.y - scaledPreviousMousePos.y);
+        if (scaledPreviousMousePos && this.activePoints) {
+          for (let i = 0, j = 3; i <= j; i++) {
+            const point = this.activeSelection.genericPointGet(i);
+            const newPointValue = new Vector2(point.x + scaledMousePosOffset.x, point.y + scaledMousePosOffset.y);
+  
+            if (this.activePoints.includes(i)) {
+              this.activeSelection.genericPointSet(i, newPointValue);
+            }
           }
         }
       }
-      this.previousMousePos = mousePos;
     }
 
     this.previousMousePos = mousePos;
