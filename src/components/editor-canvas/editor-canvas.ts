@@ -78,7 +78,9 @@ export default class EditorCanvas extends Vue {
 
     if (image) {
       this.canvasImage = new Image();
-      this.canvasImage.src = image.encodedImage;  
+      this.canvasImage.src = image.encodedImage;
+
+      this.centreScaleImage();
     } else {
       this.clearCanvas();
     }
@@ -333,6 +335,25 @@ export default class EditorCanvas extends Vue {
 
     this.editorCanvas.height = this.editorCanvas.parentElement.clientHeight;
     this.editorCanvas.width = this.editorCanvas.parentElement.clientWidth;
+
+    this.centreScaleImage();
+  }
+
+  centreScaleImage(): void {
+    if (!this.canvasImage || !this.editorCanvas) return;
+
+    // Scale image to fit canvas
+    if (this.canvasImage.width > this.editorCanvas.width) {
+      this.scale = this.editorCanvas.width / this.canvasImage.width;
+    } else if (this.canvasImage.height > this.editorCanvas.height) {
+      this.scale = this.editorCanvas.height / this.canvasImage.height;
+    } else {
+      this.scale = 1;
+    }
+
+    // Centre image
+    this.imageOffsetValue.x = (this.editorCanvas.width / 2) - ((this.canvasImage.width * this.scale) / 2);
+    this.imageOffsetValue.y = (this.editorCanvas.height / 2) - ((this.canvasImage.height * this.scale) / 2);
   }
 
   /**
@@ -341,15 +362,7 @@ export default class EditorCanvas extends Vue {
   drawImage(): void {
     if (!this.editorContext || !this.editorCanvas || !this.canvasImage) return;
 
-    const scaledImageWidth = this.canvasImage.width * this.scale;
-    const scaledImageHeight = this.canvasImage.height * this.scale;
-
-    // todo - have to remove this centering as it'll reset the pan offset. But I don't want to throw away image centering, only call this on inital image render or by recentre button?
-    // this.imageOffsetValue.x = Math.floor((this.editorCanvas.width / 2) - (scaledImageWidth / 2));
-    // this.imageOffsetValue.y = Math.floor((this.editorCanvas.height / 2) - (scaledImageHeight / 2));
-    // console.log(this.imageOffsetValue.x, this.imageOffsetValue.y);
-
-    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y, scaledImageWidth, scaledImageHeight);
+    this.editorContext.drawImage(this.canvasImage, this.imageOffsetValue.x, this.imageOffsetValue.y, this.canvasImage.width * this.scale, this.canvasImage.height * this.scale);
   }
 
   drawRectangle(selection: Selection, groupName: string): void {
