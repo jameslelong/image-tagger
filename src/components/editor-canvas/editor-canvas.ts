@@ -86,6 +86,9 @@ export default class EditorCanvas extends Vue {
     }
   }
 
+  /**
+   * Handles the mouse wheel event and zoom logic
+   */
   mouseWheel(e: WheelEvent): void {
     if (!this.editorCanvas) return;
 
@@ -99,8 +102,9 @@ export default class EditorCanvas extends Vue {
     // Scale within restrictions
     this.scale = Math.min(Math.max(.125, val), 4);
 
+    // Calculate difference of mouse position relative to image and scale
     const InsetPos = new Vector2(mousePos.x - this.imageOffsetValue.x, mousePos.y - this.imageOffsetValue.y);
-    const offsetScaleDifference = new Vector2(Math.round((InsetPos.x / previousScale) - (InsetPos.x / this.scale)), Math.round((InsetPos.y / previousScale) - (InsetPos.y / this.scale)));
+    const offsetScaleDifference = new Vector2((InsetPos.x / previousScale) - (InsetPos.x / this.scale), (InsetPos.y / previousScale) - (InsetPos.y / this.scale));
 
     // Update offset position by the difference of previous inset position and current inset position with scales applied.
     this.imageOffsetValue.x -= offsetScaleDifference.x * this.scale;
