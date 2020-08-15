@@ -83,7 +83,9 @@ export default class EditorCanvas extends Vue {
       this.canvasImage = new Image();
       this.canvasImage.src = image.encodedImage;
 
-      this.centreScaleImage();
+      this.canvasImage.onload = () => {
+        this.centreScaleImage();
+      };
     } else {
       this.clearCanvas();
     }
