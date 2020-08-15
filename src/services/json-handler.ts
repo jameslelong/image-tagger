@@ -1,5 +1,5 @@
-import { EditorImage } from 'types/image';
-import Vector2 from 'types/vector2';
+import { EditorImage } from "types/image";
+import Vector2 from "types/vector2";
 
 export default class JsonHandler {
   public output(images: Array<EditorImage>): void {
@@ -24,25 +24,28 @@ export default class JsonHandler {
             },
             object: group.linkedTag.name
           });
-        }); 
+        });
       });
 
       // Push Image & Regions to Output
       output.push(imageOutput);
     });
-    
+
     this.generateDownload(JSON.stringify(output));
   }
 
   private generateDownload(output: string) {
-    const element = document.createElement('a');
-    element.style.display = 'none';
-    
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(output));
-    element.setAttribute('download', 'output.json');
+    const element = document.createElement("a");
+    element.style.display = "none";
+
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(output)
+    );
+    element.setAttribute("download", "output.json");
 
     document.body.appendChild(element);
-  
+
     element.click();
     element.remove();
   }

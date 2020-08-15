@@ -1,6 +1,6 @@
 const path = require("path");
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/image-tagger/' : '/',
+  publicPath: process.env.NODE_ENV === "production" ? "/image-tagger/" : "/",
   configureWebpack: {
     resolve: {
       alias: {

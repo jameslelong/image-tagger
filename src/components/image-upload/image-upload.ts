@@ -30,9 +30,9 @@ export default class ImageUpload extends Vue {
   }
 
   loopUpload(files: FileList): void {
-    if (files && files.length > 0 ){
+    if (files && files.length > 0) {
       for (const file of files) {
-        this.createImage(file); 
+        this.createImage(file);
       }
     }
   }
@@ -45,9 +45,9 @@ export default class ImageUpload extends Vue {
 
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = e => {
       if (e.target && e.target.result && typeof e.target.result === "string") {
-        this.$emit('image-uploaded', file.name, e.target.result);
+        this.$emit("image-uploaded", file.name, e.target.result);
       }
     };
 

@@ -11,22 +11,23 @@ export default class Carousel extends Vue {
   public carouselOffset = 0;
 
   mounted(): void {
-    this.carousel = this.$refs["carousel-main-inner"] as HTMLCanvasElement;  
+    this.carousel = this.$refs["carousel-main-inner"] as HTMLCanvasElement;
   }
 
   selectImage(image: EditorImage): void {
-    this.$emit('image-selected', image);
+    this.$emit("image-selected", image);
   }
 
   deleteImage(imageToDelete: EditorImage): void {
     if (!this.images || !this.selectedImage) return;
 
     // Remove tag from library
-    const imageDeleteIndex = this.images.findIndex(image => image.id === imageToDelete.id);
+    const imageDeleteIndex = this.images.findIndex(
+      image => image.id === imageToDelete.id
+    );
 
     // If image to delete is selected, select the image before or after it
     if (imageToDelete.id === this.selectedImage.id) {
-      
       if (this.images.length > 1) {
         if (imageDeleteIndex > 0) {
           this.selectImage(this.images[imageDeleteIndex - 1]);
@@ -34,20 +35,20 @@ export default class Carousel extends Vue {
           this.selectImage(this.images[imageDeleteIndex + 1]);
         }
       } else {
-        this.selectImage(new EditorImage(-1, '', ''));
+        this.selectImage(new EditorImage(-1, "", ""));
       }
     }
-    
+
     // Delete image by index
     this.images.splice(imageDeleteIndex, 1);
   }
-  
+
   prev(): void {
     if (!this.carousel) return;
 
     if (this.carouselOffset < 0) {
       this.carouselOffset += this.imageWidth;
-      this.carousel.style.left = `${this.carouselOffset}px`;  
+      this.carousel.style.left = `${this.carouselOffset}px`;
     }
   }
 
@@ -59,9 +60,12 @@ export default class Carousel extends Vue {
       const carouselInnerWidth = this.carousel.clientWidth;
       const carouselParentWidth = carouselParent.clientWidth;
 
-      if (carouselInnerWidth > carouselParentWidth && carouselParentWidth - carouselInnerWidth < this.carouselOffset) {
+      if (
+        carouselInnerWidth > carouselParentWidth &&
+        carouselParentWidth - carouselInnerWidth < this.carouselOffset
+      ) {
         this.carouselOffset -= this.imageWidth;
-        this.carousel.style.left = `${this.carouselOffset}px`;  
+        this.carousel.style.left = `${this.carouselOffset}px`;
       }
     }
   }
