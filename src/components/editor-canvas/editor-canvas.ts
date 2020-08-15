@@ -87,12 +87,24 @@ export default class EditorCanvas extends Vue {
   }
 
   mouseWheel(e: WheelEvent): void {
+    if (!this.editorCanvas) return;
+
     e.preventDefault();
 
-    const val = this.scale + e.deltaY * -0.02;
+    const mousePos = this.getRelativeMousePos(this.editorCanvas, e);
 
-    // Restrict scale
+    const val = this.scale + e.deltaY * -0.02;
+    const previousScale = this.scale;
+
+    // Scale within restrictions
     this.scale = Math.min(Math.max(.125, val), 4);
+
+    const InsetPos = new Vector2(mousePos.x - this.imageOffsetValue.x, mousePos.y - this.imageOffsetValue.y);
+    const offsetScaleDifference = new Vector2(Math.round((InsetPos.x / previousScale) - (InsetPos.x / this.scale)), Math.round((InsetPos.y / previousScale) - (InsetPos.y / this.scale)));
+
+    // Update offset position by the difference of previous inset position and current inset position with scales applied.
+    this.imageOffsetValue.x -= offsetScaleDifference.x * this.scale;
+    this.imageOffsetValue.y -= offsetScaleDifference.y * this.scale;
   }
 
   mouseDown(e: MouseEvent): void {
