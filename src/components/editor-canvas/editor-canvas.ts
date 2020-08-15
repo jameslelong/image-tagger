@@ -41,7 +41,7 @@ export default class EditorCanvas extends Vue {
 
     // Leave Page Event
     window.addEventListener("beforeunload", event => {
-      this.onControlRaise();
+      this.onControlUp();
     });
     
     // Key Down Event
@@ -51,7 +51,7 @@ export default class EditorCanvas extends Vue {
       }
 
       if (event.key === "Control") {
-        this.onControlRaise();
+        this.onControlUp();
       }
     });
 
@@ -64,7 +64,10 @@ export default class EditorCanvas extends Vue {
     });
   }
 
-  onControlRaise(): void {
+  /**
+   * Disables panning
+   */
+  onControlUp(): void {
     this.isControlDown = true;
 
     if (this.editorCanvas && !this.activeSelection) {
@@ -88,6 +91,7 @@ export default class EditorCanvas extends Vue {
 
   /**
    * Handles the mouse wheel event and zoom logic
+   * @param e
    */
   mouseWheel(e: WheelEvent): void {
     if (!this.editorCanvas) return;
@@ -111,15 +115,16 @@ export default class EditorCanvas extends Vue {
     this.imageOffsetValue.y -= offsetScaleDifference.y * this.scale;
   }
 
+  /**
+   * Handles whether a selection should be created or edited, or whether to pan.
+   * @param e 
+   */
   mouseDown(e: MouseEvent): void {
     this.isMouseDown = true;
     
-    if (!this.editorContext|| !this.editorCanvas || !this.selectedImage?.encodedImage || !this.selectedTag || this.selectedTag.name === "") return;
-    
-    if (this.isControlDown) {
-      return;
-    }
-    
+    if (this.isControlDown) return;
+    if (!this.editorContext || !this.editorCanvas || !this.selectedImage?.encodedImage || !this.selectedTag || this.selectedTag.name === "") return;
+        
     const mousePos: Vector2 = this.getRelativeMousePos(this.editorCanvas, e);
     const scaledMousePos = new Vector2(Math.round((mousePos.x - this.imageOffsetValue.x) / this.scale), Math.round((mousePos.y - this.imageOffsetValue.y) / this.scale));
     const selectionCheck = this.checkSelectionAnchors(scaledMousePos);
@@ -136,6 +141,10 @@ export default class EditorCanvas extends Vue {
     }
   }
 
+  /**
+   * Handles point updating of selections and panning, 
+   * @param e
+   */
   mouseMove(e: MouseEvent): void {
     if (!this.editorContext|| !this.editorCanvas) return;
 
@@ -174,6 +183,10 @@ export default class EditorCanvas extends Vue {
     this.previousMousePos = mousePos;
   }
 
+  /**
+   * Finalises creating a selection or ending panning
+   * @param e 
+   */
   mouseUp(e: MouseEvent): void {
     this.isMouseDown = false;
 
@@ -184,6 +197,9 @@ export default class EditorCanvas extends Vue {
     this.endSelection();
   }
 
+  /**
+   * Clears active selections
+   */
   endSelection(): void {
     if (this.activeSelection) {
       this.activePoints = new Array<SelectionPoint>();
@@ -357,16 +373,17 @@ export default class EditorCanvas extends Vue {
     this.centreScaleImage();
   }
 
+  /**
+   * Centers and scales image on canvas
+   */
   centreScaleImage(): void {
     if (!this.canvasImage || !this.editorCanvas) return;
 
     // Scale image to fit canvas
-    if (this.canvasImage.width > this.editorCanvas.width) {
-      this.scale = this.editorCanvas.width / this.canvasImage.width;
-    } else if (this.canvasImage.height > this.editorCanvas.height) {
-      this.scale = this.editorCanvas.height / this.canvasImage.height;
+    if (this.canvasImage.width > this.canvasImage.height) {
+      this.scale = this.canvasImage.height > this.editorCanvas.height ? this.editorCanvas.height / this.canvasImage.height : 1;
     } else {
-      this.scale = 1;
+      this.scale = this.canvasImage.width > this.editorCanvas.width ? this.editorCanvas.width / this.canvasImage.width : 1;
     }
 
     // Centre image
