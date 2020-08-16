@@ -2,7 +2,7 @@
 
 A region tagger for images, for training machine learning models
 
-**HomePage:** [https://jameslelong.github.io/image-tagger/](https://jameslelong.github.io/image-tagger/)
+**Home Page:** [https://jameslelong.github.io/image-tagger/](https://jameslelong.github.io/image-tagger/)
 
 ![Image of User Interface](https://user-images.githubusercontent.com/30262492/89407433-27a34600-d762-11ea-9e0e-55ea2af38f43.PNG)
 
@@ -24,4 +24,3 @@ npm run serve
 * Memento
 * Custom JSON structure for output
 * Image Cropping
-* Variable Zoom
