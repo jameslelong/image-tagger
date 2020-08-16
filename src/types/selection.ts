@@ -10,7 +10,7 @@ export enum SelectionPoint {
 export class Selection {
   public id: number;
   public isHighlighted = false;
- 
+
   private _a: Vector2;
   private _b: Vector2;
   private _c: Vector2;
@@ -83,7 +83,7 @@ export class Selection {
 
   public findTopLeft(): Vector2 {
     const arr = [this.a, this.b, this.c, this.d];
-    arr.sort((a: Vector2, b: Vector2) => a.x + a.y < b.x + b.y ? -1 : 1);
+    arr.sort((a: Vector2, b: Vector2) => (a.x + a.y < b.x + b.y ? -1 : 1));
     return arr[0];
   }
 

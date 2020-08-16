@@ -68,7 +68,7 @@
 .tree-delete {
     margin: 5px;
     height: 30px;
-    width: 30px;
+    min-width: 30px;
     background: none;
     border: none;
     padding: 0;
@@ -108,12 +108,26 @@
 .tag-meta {
     display: flex;
     align-items: center;
-    flex-grow: 1;
+    // flex-grow: 1;
+    // width: 100px;
     cursor: pointer;
 }
 
 .tag-name {
     font-size: 14px;
+
+    margin-top: 2px;
+    color: #fff;
+    background: none;
+    border: none;
+
+    width: calc(100% - 25px);
+
+    &:focus {
+        margin-top: 4px;
+        padding-bottom: 2px;
+        border-bottom: 2px solid $brand-blue;
+    }
 }
 
 .tag-list-item-inner {
@@ -133,7 +147,7 @@
 }
 
 .tag-dropdown-button {
-    width: 40px;
+    min-width: 40px;
     background: none;
     border: none;
     padding: 0;

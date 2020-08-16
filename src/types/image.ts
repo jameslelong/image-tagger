@@ -1,5 +1,5 @@
 import { Selection } from "types/selection";
-import { Tag } from './tag';
+import { Tag } from "./tag";
 
 export class SelectionGroup {
   public readonly linkedTag: Tag;
@@ -15,7 +15,7 @@ export class EditorImage {
   public readonly name: string;
   public readonly encodedImage: string;
   public readonly selectionGroup = new Array<SelectionGroup>();
-  
+
   constructor(id: number, name: string, encodedImage: string) {
     this.id = id;
     this.name = name;
