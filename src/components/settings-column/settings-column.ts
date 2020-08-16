@@ -14,7 +14,7 @@ export default class ImageUpload extends Vue {
 
   private readonly jsonHandler = new JsonHandler();
 
-  private tagUID = 0;
+  private tagUID = 1;
   public tagNameInput = "";
   public activeBranches = new Array<number>();
 

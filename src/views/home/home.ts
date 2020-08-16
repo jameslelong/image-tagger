@@ -24,6 +24,12 @@ export default class Home extends Vue {
 
   private imageUID = 0;
 
+  mounted(): void {
+    const initialTag = new Tag(0, "Untitled");
+    this.tags.push(initialTag);
+    this.selectedTag = initialTag;
+  }
+
   createImage(name: string, encodedImage: string) {
     // Check that image doesn't already exist in the library
     if (this.images.find(image => image.encodedImage === encodedImage)) return;

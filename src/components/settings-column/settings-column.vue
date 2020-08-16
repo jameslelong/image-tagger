@@ -28,7 +28,7 @@
             <div class="tag-meta" v-on:click="selectTag(tag)">
               <span class="tag-id">{{ tag.id }}</span>
               <!-- todo - value can't be empty. capture click off event that saves value, also capture esc?-->
-              <input type="text" class="tag-name" v-model="tag.name">
+              <input type="text" class="tag-name" v-model="tag.name" />
             </div>
             <button class="tree-delete" v-on:click="deleteTag(tag)">
               <i class="fas fa-trash fa-xs"></i>
