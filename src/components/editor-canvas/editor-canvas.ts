@@ -26,7 +26,7 @@ export default class EditorCanvas extends Vue {
   public activePoints: Array<SelectionPoint> = new Array<SelectionPoint>();
 
   private isMouseDown = false;
-  private isControlDown = false;
+  private isPanEnabled = false;
 
   mounted(): void {
     this.editorCanvas = this.$refs["editor-canvas"] as HTMLCanvasElement;
@@ -37,43 +37,54 @@ export default class EditorCanvas extends Vue {
     // Begin Animation
     window.requestAnimationFrame(this.animationStep);
 
-    // Resize Event
+    // Event Listeners
+    // - Resize Event
     this.resizeCanvas();
     window.addEventListener("resize", this.resizeCanvas);
 
-    // Leave Page Event
+    // - Leave Page Event
     window.addEventListener("beforeunload", event => {
-      this.onControlUp();
+      this.disablePan();
     });
 
-    // Key Down Event
+    // - Key Down Event
     window.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         this.endSelection();
       }
 
-      if (event.key === "Control") {
-        this.onControlUp();
+      if (event.key === "Alt") {
+        event.preventDefault();
+        this.enablePan();
       }
     });
 
-    // Key Up Event
+    // - Key Up Event
     window.addEventListener("keyup", event => {
-      this.isControlDown = false;
-      if (this.editorCanvas && !this.activeSelection) {
-        this.editorCanvas.style.cursor = "default";
-      }
+      this.disablePan();
     });
   }
 
   /**
-   * Disables panning
+   * Enable Panning
    */
-  onControlUp(): void {
-    this.isControlDown = true;
+  enablePan(): void {
+    this.isPanEnabled = true;
 
     if (this.editorCanvas && !this.activeSelection) {
       this.editorCanvas.style.cursor = "move";
+    }
+  }
+
+  /**
+   * Disable Panning
+   */
+  disablePan(): void {
+    console.log('sup');
+    this.isPanEnabled = false;
+
+    if (this.editorCanvas && !this.activeSelection) {
+      this.editorCanvas.style.cursor = "default";
     }
   }
 
@@ -132,7 +143,7 @@ export default class EditorCanvas extends Vue {
   mouseDown(e: MouseEvent): void {
     this.isMouseDown = true;
 
-    if (this.isControlDown) return;
+    if (this.isPanEnabled) return;
     if (
       !this.editorContext ||
       !this.editorCanvas ||
@@ -179,7 +190,7 @@ export default class EditorCanvas extends Vue {
       mousePos.y - this.previousMousePos.y
     );
 
-    if (this.isControlDown && !this.activeSelection) {
+    if (this.isPanEnabled && !this.activeSelection) {
       // Pan Mode
       if (this.isMouseDown) {
         this.imageOffsetValue.x += mousePosOffset.x;
