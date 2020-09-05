@@ -34,34 +34,56 @@ export default class EditorCanvas extends Vue {
       "2d"
     ) as CanvasRenderingContext2D;
 
+    this.resizeCanvas();
+
     // Begin Animation
     window.requestAnimationFrame(this.animationStep);
 
     // Event Listeners
+    // - Mouse Events
+    this.editorCanvas.addEventListener("mousedown", event => {
+      this.isMouseDown = true;
+      event.preventDefault();
+      // Primary Mouse
+      if (event.buttons === 1) { 
+        this.mouseDown(event);
+        return;
+      }
+
+      // Middle Mouse
+      if (event.buttons === 4) {
+        this.enablePan();
+        return;
+      }
+    });
+
     // - Resize Event
-    this.resizeCanvas();
     window.addEventListener("resize", this.resizeCanvas);
 
+    this.editorCanvas.addEventListener("mouseup", event => {
+      this.isMouseDown = false;
+      this.mouseUp(event);
+      this.disablePan();
+    });
+
+    this.editorCanvas.addEventListener("mousemove", event => {
+      this.mouseMove(event);
+    });
+
+    this.editorCanvas.addEventListener("wheel", event => {
+      this.mouseWheel(event);
+    });
+  
     // - Leave Page Event
-    window.addEventListener("beforeunload", event => {
+    this.editorCanvas.addEventListener("beforeunload", event => {
       this.disablePan();
     });
 
     // - Key Down Event
-    window.addEventListener("keydown", event => {
+    this.editorCanvas.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         this.endSelection();
       }
-
-      if (event.key === "Alt") {
-        event.preventDefault();
-        this.enablePan();
-      }
-    });
-
-    // - Key Up Event
-    window.addEventListener("keyup", event => {
-      this.disablePan();
     });
   }
 
@@ -80,7 +102,6 @@ export default class EditorCanvas extends Vue {
    * Disable Panning
    */
   disablePan(): void {
-    console.log('sup');
     this.isPanEnabled = false;
 
     if (this.editorCanvas && !this.activeSelection) {
@@ -97,7 +118,8 @@ export default class EditorCanvas extends Vue {
       this.canvasImage.src = image.encodedImage;
 
       this.canvasImage.onload = () => {
-        this.centreScaleImage();
+        this.scaleImage();
+        this.centreImage();
       };
     } else {
       this.clearCanvas();
@@ -136,13 +158,18 @@ export default class EditorCanvas extends Vue {
     this.imageOffsetValue.y -= offsetScaleDifference.y * this.scale;
   }
 
+  staticZoom(zoomIn: boolean): void {
+    const newScale = this.scale += zoomIn ? 0.2 : -0.2;
+    this.scale = Math.min(Math.max(0.125, newScale), 4);
+
+    this.centreImage();
+  }
+
   /**
    * Handles whether a selection should be created or edited, or whether to pan.
    * @param e
    */
   mouseDown(e: MouseEvent): void {
-    this.isMouseDown = true;
-
     if (this.isPanEnabled) return;
     if (
       !this.editorContext ||
@@ -241,8 +268,6 @@ export default class EditorCanvas extends Vue {
    * @param e
    */
   mouseUp(e: MouseEvent): void {
-    this.isMouseDown = false;
-
     if (this.newSelection && this.activeSelection) {
       this.createNewSelection(this.newSelection);
     }
@@ -451,14 +476,12 @@ export default class EditorCanvas extends Vue {
 
     this.editorCanvas.height = this.editorCanvas.parentElement.clientHeight;
     this.editorCanvas.width = this.editorCanvas.parentElement.clientWidth;
-
-    this.centreScaleImage();
   }
 
   /**
-   * Centers and scales image on canvas
+   * Scales image on canvas
    */
-  centreScaleImage(): void {
+  scaleImage(): void {
     if (!this.canvasImage || !this.editorCanvas) return;
 
     // Scale image to fit canvas
@@ -473,8 +496,14 @@ export default class EditorCanvas extends Vue {
           ? this.editorCanvas.width / this.canvasImage.width
           : 1;
     }
+  }
 
-    // Centre image
+  /**
+   * Centres image on canvas
+   */
+  centreImage(): void {
+    if (!this.canvasImage || !this.editorCanvas) return;
+
     this.imageOffsetValue.x =
       this.editorCanvas.width / 2 - (this.canvasImage.width * this.scale) / 2;
     this.imageOffsetValue.y =
