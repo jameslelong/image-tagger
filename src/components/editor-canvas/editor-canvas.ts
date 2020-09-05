@@ -41,7 +41,7 @@ export default class EditorCanvas extends Vue {
 
     // Event Listeners
     // - Mouse Events
-    window.addEventListener("mousedown", event => {
+    this.editorCanvas.addEventListener("mousedown", event => {
       this.isMouseDown = true;
       event.preventDefault();
       // Primary Mouse
@@ -57,30 +57,30 @@ export default class EditorCanvas extends Vue {
       }
     });
 
-    window.addEventListener("mouseup", event => {
+    // - Resize Event
+    window.addEventListener("resize", this.resizeCanvas);
+
+    this.editorCanvas.addEventListener("mouseup", event => {
       this.isMouseDown = false;
       this.mouseUp(event);
       this.disablePan();
     });
 
-    window.addEventListener("mousemove", event => {
+    this.editorCanvas.addEventListener("mousemove", event => {
       this.mouseMove(event);
     });
 
-    window.addEventListener("wheel", event => {
+    this.editorCanvas.addEventListener("wheel", event => {
       this.mouseWheel(event);
     });
-    
-    // - Resize Event
-    window.addEventListener("resize", this.resizeCanvas);
-
+  
     // - Leave Page Event
-    window.addEventListener("beforeunload", event => {
+    this.editorCanvas.addEventListener("beforeunload", event => {
       this.disablePan();
     });
 
     // - Key Down Event
-    window.addEventListener("keydown", event => {
+    this.editorCanvas.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         this.endSelection();
       }
@@ -118,7 +118,8 @@ export default class EditorCanvas extends Vue {
       this.canvasImage.src = image.encodedImage;
 
       this.canvasImage.onload = () => {
-        this.centreScaleImage();
+        this.scaleImage();
+        this.centreImage();
       };
     } else {
       this.clearCanvas();
@@ -155,6 +156,13 @@ export default class EditorCanvas extends Vue {
     // Update offset position by the difference of previous inset position and current inset position with scales applied.
     this.imageOffsetValue.x -= offsetScaleDifference.x * this.scale;
     this.imageOffsetValue.y -= offsetScaleDifference.y * this.scale;
+  }
+
+  staticZoom(zoomIn: boolean): void {
+    const newScale = this.scale += zoomIn ? 0.2 : -0.2;
+    this.scale = Math.min(Math.max(0.125, newScale), 4);
+
+    this.centreImage();
   }
 
   /**
@@ -210,7 +218,6 @@ export default class EditorCanvas extends Vue {
     );
 
     if (this.isPanEnabled && !this.activeSelection) {
-      console.log('pan');
       // Pan Mode
       if (this.isMouseDown) {
         this.imageOffsetValue.x += mousePosOffset.x;
@@ -472,9 +479,9 @@ export default class EditorCanvas extends Vue {
   }
 
   /**
-   * Centers and scales image on canvas
+   * Scales image on canvas
    */
-  centreScaleImage(): void {
+  scaleImage(): void {
     if (!this.canvasImage || !this.editorCanvas) return;
 
     // Scale image to fit canvas
@@ -489,8 +496,14 @@ export default class EditorCanvas extends Vue {
           ? this.editorCanvas.width / this.canvasImage.width
           : 1;
     }
+  }
 
-    // Centre image
+  /**
+   * Centres image on canvas
+   */
+  centreImage(): void {
+    if (!this.canvasImage || !this.editorCanvas) return;
+
     this.imageOffsetValue.x =
       this.editorCanvas.width / 2 - (this.canvasImage.width * this.scale) / 2;
     this.imageOffsetValue.y =

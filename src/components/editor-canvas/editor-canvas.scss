@@ -1,5 +1,40 @@
 #editor-canvas {
   height: calc(100% - 100px);
   width: 100%;
+  position: relative;
 }
 
+#editor-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+
+  button {
+    pointer-events: initial;
+  }
+}
+
+#zoom-control-group {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+
+  button {
+    background: $brand-blue;
+    border: none;
+    height: 40px;
+    width: 40px;
+    padding: 0;
+    color: #fff;
+    border-radius: 5px;
+    
+    cursor: pointer;
+
+    &:first-of-type {
+      margin-right: 10px;
+    }
+  }
+}
